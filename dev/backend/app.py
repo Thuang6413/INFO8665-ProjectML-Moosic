@@ -1,12 +1,84 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
+from flask import Flask
 
 app = Flask(__name__)
-CORS(app)
 
-@app.route('/api/hello')
-def hello():
-    return jsonify({'message': 'Hello from Flask backend!'})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+@app.route("/api/register", methods=["POST"])
+def register():
+    return "Register a new user"
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    return "Authenticate a user and return a token"
+
+
+@app.route("/api/user", methods=["GET"])
+def get_user():
+    return "Get current user profile info"
+
+
+@app.route("/api/user", methods=["PUT"])
+def update_user():
+    return "Update user preferences or profile details"
+
+
+@app.route("/api/emotion/face", methods=["POST"])
+def detect_emotion_face():
+    return "Upload an image (face) and return detected emotion"
+
+
+@app.route("/api/emotion/voice", methods=["POST"])
+def detect_emotion_voice():
+    return "Upload audio and return detected emotion"
+
+
+@app.route("/api/emotion/multi", methods=["POST"])
+def detect_emotion_multi():
+    return "Upload both face and voice data → returns fused emotion"
+
+
+@app.route("/api/emotion/history", methods=["GET"])
+def emotion_history():
+    return "Get emotion detection history for the user"
+
+
+@app.route("/api/music/recommendation", methods=["GET"])
+def music_recommendation():
+    return "Get music suggestions based on latest detected emotion"
+
+
+@app.route("/api/music/mood/<emotion>", methods=["GET"])
+def music_by_mood(emotion):
+    return f"Get music list based on a manually selected emotion (e.g., {emotion})"
+
+
+@app.route("/api/music/feedback", methods=["POST"])
+def music_feedback():
+    return "Submit feedback on song relevance (for personalization)"
+
+
+@app.route("/api/model/retrain", methods=["POST"])
+def retrain_model():
+    return "Trigger ML model retraining with new data (admin use)"
+
+
+@app.route("/api/model/status", methods=["GET"])
+def model_status():
+    return "Check current ML model version and health"
+
+
+@app.route("/api/model/logs", methods=["GET"])
+def model_logs():
+    return "Get logs or errors related to model inference or training"
+
+
+@app.route("/api/music/playlist", methods=["GET"])
+def get_playlist():
+    return "Get your current playlist"
+
+
+if __name__ == "__main__":
+    import os
+
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
