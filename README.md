@@ -7,6 +7,8 @@
 INFO8665-ProjectML-Moosic/
 ├── data-collection/ # Directory for dataset
 ├── dev/ # Directory for development
+│   ├── backend/
+│   ├── frontend/
 ├── documentation/ # Directory for any documentation
 ├── training/ # Directory for trained model
 ├── orchestrator.ipynb
