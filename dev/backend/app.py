@@ -1,4 +1,7 @@
 from flask import Flask
+import os
+from flask import request, jsonify
+
 
 app = Flask(__name__)
 
@@ -25,17 +28,32 @@ def update_user():
 
 @app.route("/api/emotion/face", methods=["POST"])
 def detect_emotion_face():
-    return "Upload an image (face) and return detected emotion"
+    if 'image' not in request.files:
+        return jsonify({"error": "Missing 'image' parameter"}), 400
+
+    # Simulate emotion detection result
+    emotion = "Happy"  # Example result
+    return jsonify({"emotion": emotion}), 200
 
 
 @app.route("/api/emotion/voice", methods=["POST"])
 def detect_emotion_voice():
-    return "Upload audio and return detected emotion"
+    if 'audio' not in request.files:
+        return jsonify({"error": "Missing 'audio' parameter"}), 400
+
+    # Simulate emotion detection result
+    emotion = "Calm"  # Example result
+    return jsonify({"emotion": emotion}), 200
 
 
 @app.route("/api/emotion/multi", methods=["POST"])
 def detect_emotion_multi():
-    return "Upload both face and voice data → returns fused emotion"
+    if 'image' not in request.files or 'audio' not in request.files:
+        return jsonify({"error": "Missing 'image' and/or 'audio' parameter"}), 400
+
+    # Simulate fusion detection result
+    emotion = "Neutral"  # Example result
+    return jsonify({"emotion": emotion}), 200
 
 
 @app.route("/api/emotion/history", methods=["GET"])
@@ -79,6 +97,5 @@ def get_playlist():
 
 
 if __name__ == "__main__":
-    import os
 
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
