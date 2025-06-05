@@ -2,7 +2,7 @@
 
 Base URL: `http://localhost:5000`
 
----
+----
 
 ## Authentication & User Endpoints
 
