@@ -1,29 +1,29 @@
 # dev/backend/services/emotion_inference.py
-import os
-import joblib
+
 import numpy as np
 from PIL import Image
 
-# Set model path
-from config import MODEL_PATHS
-MODEL_PATH = MODEL_PATHS["emotion_face"]
-
-# Load model (assumed to be in scikit-learn format)
 try:
-    model = joblib.load(MODEL_PATH)
-except Exception as e:
-    model = None
-    print(f"[ERROR] Failed to load model: {e}")
+    from deepface import DeepFace
+    USE_DEEPFACE = True
+except ImportError:
+    USE_DEEPFACE = False
+    print("[ERROR] DeepFace is not installed. Install it with 'pip install deepface'.")
 
 def preprocess_image(image_file):
-    # Convert to grayscale, resize to 48x48, normalize
-    image = Image.open(image_file).convert('L').resize((48, 48))
-    image_array = np.asarray(image) / 255.0
-    return image_array.flatten()
+    image = Image.open(image_file).convert('RGB')
+    return np.asarray(image)
 
 def predict_emotion(image_file):
-    if not model:
-        return "Model not available"
-    image_array = preprocess_image(image_file)
-    prediction = model.predict([image_array])[0]
-    return prediction
+    if not USE_DEEPFACE:
+        return "DeepFace not available"
+
+    try:
+        image_array = preprocess_image(image_file)
+        result = DeepFace.analyze(image_array, actions=["emotion"], enforce_detection=False)
+        emotion = result[0]["dominant_emotion"]
+        return emotion
+    except Exception as e:
+        print(f"[ERROR] DeepFace prediction failed: {e}")
+        return "Unable to predict emotion"
+
