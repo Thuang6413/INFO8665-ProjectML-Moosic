@@ -2,6 +2,7 @@ from models.user import db, User
 from utils.auth_utils import hash_password, check_password
 
 def register_user(data):
+    print("Registering user with data:", data)
     if User.query.filter_by(username=data["username"]).first():
         return {"error": "User already exists"}, 409
 
