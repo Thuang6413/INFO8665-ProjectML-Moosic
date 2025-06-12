@@ -1,106 +1,168 @@
-# MoosicAPI – RESTful API Documentation
+# Moosic API Documentation
 
-Base URL: `http://localhost:5000`
+## User Authentication APIs
 
-----
+### POST /api/v1/user/register
+**Description**: Register new user  
+**Request Body**:  
+```json
+{ "email": string, "password": string, ... }
+```  
+**Response Body**:  
+```json
+{ "token": string, "user": object }
+```
 
-## Authentication & User Endpoints
+### POST /api/v1/user/login
+**Description**: Login existing user  
+**Request Body**:  
+```json
+{ "email": string, "password": string }
+```  
+**Response Body**:  
+```json
+{ "token": string, "user": object }
+```
 
-### POST /api/register  
-Registers a new user.  
-**Request Body (JSON):**  
-- `username`: string  
-- `password`: string  
+### GET /api/v1/user
+**Description**: Get current user profile  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "username": string, "preferences": object }
+```
 
----
+### PUT /api/v1/user
+**Description**: Update user preferences  
+**Request Body**:  
+```json
+{ "preferences": object }
+```  
+**Response Body**:  
+```json
+{ "message": "updated" }
+```
 
-### POST /api/login  
-Authenticates a user and returns a token.  
-**Request Body (JSON):**  
-- `username`: string  
-- `password`: string  
+## Emotion Detection APIs
 
----
+### POST /api/v1/emotion/face
+**Description**: Detect emotion from image  
+**Request Body**: multipart/form-data with image  
+**Response Body**:  
+```json
+{ "emotion": "Happy" }
+```
 
-### GET /api/user  
-Retrieves the current user's profile information.  
+### POST /api/v1/emotion/voice
+**Description**: Detect emotion from audio  
+**Request Body**: multipart/form-data with audio  
+**Response Body**:  
+```json
+{ "emotion": "Calm" }
+```
 
----
+### POST /api/v1/emotion/multi
+**Description**: Detect emotion from image + audio  
+**Request Body**: multipart/form-data with image, audio  
+**Response Body**:  
+```json
+{ "emotion": "Neutral" }
+```
 
-### PUT /api/user  
-Updates user preferences or profile details.  
-**Request Body (JSON):**  
-- Any user preference fields (e.g., `preferred_genre`, `theme`)
+### GET /api/v1/emotion/history
+**Description**: Retrieve recent detection history  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "history": ["Happy", ...] }
+```
 
----
+## Music Recommendation APIs
 
-## Emotion Detection Endpoints
+### GET /api/v1/music/recommendation
+**Description**: Get music recommendation  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "songs": ["Song A", "Song B"] }
+```
 
-### POST /api/emotion/face  
-Uploads a face image and returns detected emotion.  
-**Request Body:** Multipart/form-data with image file
+### GET /api/v1/music/mood/{emotion}
+**Description**: Get songs based on emotion  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "songs": [...] }
+```
 
----
+### POST /api/v1/music/feedback
+**Description**: Submit music feedback  
+**Request Body**:  
+```json
+{ "rating": number, "songId": string }
+```  
+**Response Body**:  
+```json
+{ "message": "Feedback submitted" }
+```
 
-### POST /api/emotion/voice  
-Uploads audio and returns detected emotion.  
-**Request Body:** Multipart/form-data with audio file
+### GET /api/v1/music/playlist
+**Description**: Get user's current playlist  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "playlist": ["Song1", ...] }
+```
 
----
+## Model Management APIs
 
-### POST /api/emotion/multi  
-Uploads both face and voice data and returns fused emotion.  
-**Request Body:** Multipart/form-data with image and audio files
+### POST /api/v1/model/retrain
+**Description**: Trigger model retraining  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "message": "Model retraining triggered" }
+```
 
----
+### GET /api/v1/model/status
+**Description**: Get model status  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "status": "ok", "version": "v1.0.0" }
+```
 
-### GET /api/emotion/history  
-Retrieves emotion detection history for the user.  
-**Authorization:** Token (if implemented)
+### GET /api/v1/model/logs
+**Description**: View model logs  
+**Request Body**: None  
+**Response Body**:  
+```json
+{ "logs": ["Log1", "Log2"] }
+```
 
----
+## Error Handling
 
-## Music Recommendation Endpoints
+- **400 Bad Request**  
+  ```json
+  {"error": "Missing 'image' parameter"}
+  ```
 
-### GET /api/music/recommendation  
-Returns music suggestions based on the latest detected emotion.
+- **401 Unauthorized**  
+  ```json
+  {"error": "Invalid credentials"}
+  ```
 
----
+- **403 Forbidden**  
+  ```json
+  {"error": "Access denied"}
+  ```
 
-### GET /api/music/mood/<emotion>  
-Returns a music list based on a manually selected emotion.  
-**Path Parameter:**  
-- `emotion`: string
+- **404 Not Found**  
+  ```json
+  {"error": "Endpoint does not exist"}
+  ```
 
----
-
-### POST /api/music/feedback  
-Submits feedback on song relevance.  
-**Request Body (JSON):**  
-- `song_id`: string  
-- `relevance`: string or score
-
----
-
-## Machine Learning Model Endpoints
-
-### POST /api/model/retrain  
-Triggers ML model retraining with new data.  
-**Authorization:** Admin (if implemented)
-
----
-
-### GET /api/model/status  
-Returns current model version and health status.
-
----
-
-### GET /api/model/logs  
-Retrieves logs or error traces related to the model.
-
----
-
-## Playlist Endpoint
-
-### GET /api/music/playlist  
-Returns the current playlist for the user.
+- **500 Internal Server Error**  
+  ```json
+  {"error": "Unexpected server error"}
+  ```
