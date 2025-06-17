@@ -1,5 +1,8 @@
-from models.user import db, User
-from utils.auth_utils import hash_password, check_password
+# dev/backend/services/auth_service.py
+from flask import current_app
+from models import db, User, Token
+from utils.auth_utils import hash_password, check_password, generate_token
+from datetime import datetime, timedelta
 
 def register_user(data):
     print("Registering user with data:", data)
@@ -13,10 +16,38 @@ def register_user(data):
     )
     db.session.add(user)
     db.session.commit()
-    return {"message": "User registered successfully"}, 201
+
+    # Generate and save JWT
+    token = generate_token(user.id, user.username)
+    token_obj = Token(
+        token=token,
+        user_id=user.id,
+        expires_at=datetime.utcnow() + timedelta(seconds=current_app.config['JWT_EXPIRATION_DELTA'])
+    )
+    db.session.add(token_obj)
+    db.session.commit()
+
+    return {
+        "message": "User registered successfully",
+        "token": token
+    }, 201
 
 def login_user(data):
     user = User.query.filter_by(username=data["username"]).first()
     if not user or not check_password(data["password"], user.password_hash):
         return {"error": "Invalid credentials"}, 401
-    return {"message": "Login successful"}, 200
+    
+    # Generate and save JWT
+    token = generate_token(user.id, user.username)
+    token_obj = Token(
+        token=token,
+        user_id=user.id,
+        expires_at=datetime.utcnow() + timedelta(seconds=current_app.config['JWT_EXPIRATION_DELTA'])
+    )
+    db.session.add(token_obj)
+    db.session.commit()
+
+    return {
+        "message": "Login successful",
+        "token": token
+    }, 200
