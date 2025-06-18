@@ -96,30 +96,6 @@ Saved data:
 
 ---
 
-## 📊 Display Image and Score (Jupyter Notebook Example)
-
-```python
-import pandas as pd
-from IPython.display import display, HTML
-
-df = pd.read_csv("captured_data/emotion_scores.csv")
-target_image = "capture_YYYYMMDD_HHMMSS.jpg"
-row = df[df['filename'] == target_image]
-
-if not row.empty:
-    valence = row['valence'].values[0]
-    arousal = row['arousal'].values[0]
-    html = f'''
-    <h4>This is how the Final Output Looks:</h4>
-    <img src="captured_data/{target_image}" width="300"><br><br>
-    <b>Valence:</b> {valence:.4f}<br>
-    <b>Arousal:</b> {arousal:.4f}
-    '''
-    display(HTML(html))
-```
-
----
-
 ## ⚠️ Notes
 
 - Input image size: **96x96 grayscale**
@@ -131,7 +107,7 @@ if not row.empty:
 
 ## 👨‍💻 Author
 
-Developed by **Shaik Adeen**  
+Developed by **Shaik Adeen** and Co.  
 Built using TensorFlow, OpenCV, and Python.
 
 ---
