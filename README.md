@@ -14,3 +14,130 @@ INFO8665-ProjectML-Moosic/
 ├── orchestrator.ipynb
 └── README.md
 ```
+# Emotion Detection Use Case 
+
+
+## Emotion Detection Using CNN (Valence & Arousal Regression)
+
+This project captures real-time video frames, detects faces, and predicts emotional valence and arousal using a trained Convolutional Neural Network (CNN). It supports live camera capture, real-time predictions, saving captured images and scores, and visual display of results.
+
+---
+
+## 📁 Project Structure
+
+```
+Emotion Detection Project/
+├── model_training.py               # Trains the emotion recognition model
+├── model_deployment.py            # Runs webcam inference and captures data
+├── Emotion_Recognition_Model.h5   # Trained Keras model
+├── training.csv                   # Dataset for training (valence, arousal, image path)
+├── requirements.txt               # All dependencies listed here
+├── README.md                      # Project documentation
+├── captured_data/
+│   ├── emotion_scores.csv         # CSV of captured image scores
+│   └── capture_*.jpg              # Captured frames from webcam
+└── Manually_Annotated_Images/
+    └── <image folders>            # Optional manual dataset
+```
+
+---
+
+## 🛠️ Setup Instructions
+
+1. **Clone or Download** the project.
+
+2. **Install Dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+This includes:
+- TensorFlow
+- OpenCV
+- NumPy
+- Pandas
+- scikit-learn
+- matplotlib
+- tqdm
+
+---
+
+## 🧠 Model Training
+
+To train the model:
+
+```bash
+python model_training.py
+```
+
+- Loads and preprocesses data from `training.csv`
+- Trains two CNN models
+- Saves the best performing model as `Emotion_Recognition_Model.h5`
+- Plots training history comparison
+
+---
+
+## 🎥 Real-Time Emotion Detection
+
+To start live emotion detection and capture:
+
+```bash
+python model_deployment.py
+```
+
+### Features:
+- Detects face using Haar Cascade
+- Predicts valence & arousal for the face
+- Press `c` to capture an image + save its prediction
+- Press `q` to quit
+
+Saved data:
+- Captured images: `captured_data/`
+- Scores logged to: `captured_data/emotion_scores.csv`
+
+---
+
+## 📊 Display Image and Score (Jupyter Notebook Example)
+
+```python
+import pandas as pd
+from IPython.display import display, HTML
+
+df = pd.read_csv("captured_data/emotion_scores.csv")
+target_image = "capture_YYYYMMDD_HHMMSS.jpg"
+row = df[df['filename'] == target_image]
+
+if not row.empty:
+    valence = row['valence'].values[0]
+    arousal = row['arousal'].values[0]
+    html = f'''
+    <h4>This is how the Final Output Looks:</h4>
+    <img src="captured_data/{target_image}" width="300"><br><br>
+    <b>Valence:</b> {valence:.4f}<br>
+    <b>Arousal:</b> {arousal:.4f}
+    '''
+    display(HTML(html))
+```
+
+---
+
+## ⚠️ Notes
+
+- Input image size: **96x96 grayscale**
+- Valence & Arousal range: **[-1, 1]**
+- Ensure webcam is enabled and accessible
+- Close `emotion_scores.csv` if appending fails (PermissionError)
+
+---
+
+## 👨‍💻 Author
+
+Developed by **Shaik Adeen**  
+Built using TensorFlow, OpenCV, and Python.
+
+---
+
+## 📄 License
+
+This project is licensed for educational and research purposes.
