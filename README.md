@@ -23,21 +23,19 @@ This project captures real-time video frames, detects faces, and predicts emotio
 
 ---
 
-## 📁 Project Structure
+## 📁 Use Case Directory Structure
 
 ```
-Emotion Detection Project/
-├── model_training.py               # Trains the emotion recognition model
-├── model_deployment.py            # Runs webcam inference and captures data
+Emotion Detection use case 1/
+├── Emotion_Recognition_Model_Training.ipynb               # Trains the emotion recognition model
+├── Emotion_Detection_Model_Deployment.ipynb            # Runs webcam inference and captures data
 ├── Emotion_Recognition_Model.h5   # Trained Keras model
 ├── training.csv                   # Dataset for training (valence, arousal, image path)
-├── requirements.txt               # All dependencies listed here
+├── requirements_Emotion_Recognition_Venv.txt               # All dependencies listed here
 ├── README.md                      # Project documentation
 ├── captured_data/
 │   ├── emotion_scores.csv         # CSV of captured image scores
 │   └── capture_*.jpg              # Captured frames from webcam
-└── Manually_Annotated_Images/
-    └── <image folders>            # Optional manual dataset
 ```
 
 ---
