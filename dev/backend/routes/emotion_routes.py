@@ -1,4 +1,3 @@
-
 # dev/backend/routes/emotion_routes.py
 from flask import Blueprint, request, jsonify
 from services.emotion_inference import predict_emotion
@@ -12,7 +11,12 @@ def detect_emotion_face():
         return jsonify({"error": "Missing 'image' parameter"}), 400
 
     image = request.files["image"]
-    emotion = predict_emotion(image)
+    model_name = request.form.get("model")  # Get model name from form data
+    if not model_name:
+        model_name = "emotion_face_affectnet"
+
+    print(f"[DEBUG] Using model: {model_name} for emotion detection")
+    emotion = predict_emotion(image, model_name)
     return jsonify({"emotion": emotion}), 200
 
 
@@ -22,11 +26,13 @@ def detect_emotion_voice():
         return jsonify({"error": "Missing 'audio' parameter"}), 400
     return jsonify({"emotion": "Calm"})
 
+
 @emotion_bp.route("/multi", methods=["POST"])
 def detect_emotion_multi():
     if 'image' not in request.files or 'audio' not in request.files:
         return jsonify({"error": "Missing 'image' and/or 'audio' parameter"}), 400
     return jsonify({"emotion": "Neutral"})
+
 
 @emotion_bp.route("/history", methods=["GET"])
 def emotion_history():
