@@ -36,8 +36,10 @@ Emotion Detection use case 1/
 ├── captured_data/
 │   ├── emotion_scores.csv         # CSV of captured image scores
 │   └── capture_*.jpg              # Captured frames from webcam
-```
+
 other than this we also have the HTML version of the same notebook files to host it on GitHub Pages
+```
+
 ---
 
 ## 🛠️ Setup Instructions
