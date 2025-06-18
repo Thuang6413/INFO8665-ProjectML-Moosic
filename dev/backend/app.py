@@ -5,14 +5,19 @@ from routes.emotion_routes import emotion_bp
 from routes.music_routes import music_bp
 from routes.model_routes import model_bp
 from utils.error_handlers import register_error_handlers
-from models.user import db
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS # Import configurations
+from flask_sqlalchemy import SQLAlchemy
+from models import db
+from config import Config  # Import the Config class for configurations
+# from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS # Import configurations
 
 app = Flask(__name__)
 
 # Configure the database from config.py
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+# app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+
+# Load all configurations from config.py
+app.config.from_object(Config)
 
 # Initialize the database
 db.init_app(app)
