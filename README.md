@@ -37,7 +37,7 @@ Emotion Detection use case 1/
 │   ├── emotion_scores.csv         # CSV of captured image scores
 │   └── capture_*.jpg              # Captured frames from webcam
 ```
-
+other than this we also have the HTML version of the same notebook files to host it on GitHub Pages
 ---
 
 ## 🛠️ Setup Instructions
@@ -68,7 +68,7 @@ This includes:
 To train the model:
 
 ```bash
-python model_training.py
+motion_Recognition_Model_Training.ipynb
 ```
 
 - Loads and preprocesses data from `training.csv`
@@ -83,7 +83,7 @@ python model_training.py
 To start live emotion detection and capture:
 
 ```bash
-python model_deployment.py
+Emotion_Detection_Model_Deployment
 ```
 
 ### Features:
