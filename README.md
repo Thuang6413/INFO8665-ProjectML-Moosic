@@ -45,9 +45,11 @@ Emotion Detection use case 1/
 1. **Clone or Download** the project.
 
 2. **Install Dependencies**
+   
+run this on either your local terminal or virtual environment terminal.
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements_Emotion_Recognition_Venv.txt
 ```
 
 This includes:
