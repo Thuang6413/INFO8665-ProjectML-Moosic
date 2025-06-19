@@ -6,9 +6,14 @@ from routes.emotion_routes import emotion_bp
 from routes.music_routes import music_bp
 from routes.model_routes import model_bp
 from utils.error_handlers import register_error_handlers
-from flask_sqlalchemy import SQLAlchemy
 from models import db
 from config import Config
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+print(f"[DEBUG] Loaded env: {os.getenv('SPOTIFY_CLIENT_ID')}")
 
 # Check GPU availability at startup
 print("[DEBUG] Checking GPU availability...")
@@ -52,4 +57,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)

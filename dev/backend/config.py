@@ -1,7 +1,6 @@
 # dev/backend/config.py
 import os
 
-
 class Config:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,3 +17,8 @@ class Config:
     # JWT Configuration
     SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'moosic-secret')
     JWT_EXPIRATION_DELTA = 3600
+
+    # Spotify API Configuration
+    CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID', 'default_client_id')
+    CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET', 'default_client_secret')
+    REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5001/callback')  # Ensure consistency
