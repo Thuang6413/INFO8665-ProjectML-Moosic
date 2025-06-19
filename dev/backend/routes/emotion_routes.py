@@ -13,7 +13,7 @@ def detect_emotion_face():
     image = request.files["image"]
     model_name = request.form.get("model")  # Get model name from form data
     if not model_name:
-        model_name = "emotion_face_affectnet"
+        model_name = "emotion_face_fer2013"
 
     print(f"[DEBUG] Using model: {model_name} for emotion detection")
     emotion = predict_emotion(image, model_name)
