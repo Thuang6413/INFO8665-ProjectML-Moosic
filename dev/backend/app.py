@@ -9,6 +9,7 @@ from utils.error_handlers import register_error_handlers
 from models import db
 from config import Config
 from dotenv import load_dotenv
+from flask_cors import CORS 
 import os
 
 # Load environment variables from .env file
@@ -24,6 +25,7 @@ else:
     print("[DEBUG] No GPU detected. Running on CPU.")
 
 app = Flask(__name__)
+CORS(app)
 
 # Load all models at startup and attach to app
 print("[DEBUG] Initializing application and loading emotion recognition models...")
