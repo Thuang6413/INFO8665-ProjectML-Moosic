@@ -57,22 +57,24 @@ const handleCapture = async () => {
 
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  const base64Image = canvas.toDataURL('image/png'); // e.g., "data:image/png;base64,iVBOR..."
+  canvas.toBlob(async (blob) => {
+    if (!blob) return;
 
-  try {
-    const response = await fetch('http://127.0.0.1:5000/api/v1/emotion/face', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      body: base64Image, // Send the base64 string as plain text
-    });
+    const formData = new FormData();
+    formData.append('image', blob, 'capture.png');
 
-    const result = await response.json();
-    console.log('Server response:', result);
-  } catch (err) {
-    console.error('Error uploading base64 image:', err);
-  }
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/v1/emotion/face', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log('Server response:', result);
+    } catch (err) {
+      console.error('Error uploading binary image:', err);
+    }
+  }, 'image/png');
 };
 
 
