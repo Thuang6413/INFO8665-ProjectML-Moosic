@@ -22,3 +22,18 @@ class Token(db.Model):
     def is_expired(self):
         from datetime import datetime
         return datetime.utcnow() > self.expires_at
+    
+class Song(db.Model):
+    __tablename__ = 'songs'
+    id = db.Column(db.Integer, primary_key=True)
+    lastfm_url = db.Column(db.String)
+    track = db.Column(db.String)
+    artist = db.Column(db.String)
+    seeds = db.Column(db.String)
+    number_of_emotion_tags = db.Column(db.Integer)
+    valence_tags = db.Column(db.Float)
+    arousal_tags = db.Column(db.Float)
+    dominance_tags = db.Column(db.Float)
+    mbid = db.Column(db.String)
+    spotify_id = db.Column(db.String)
+    genre = db.Column(db.String)
