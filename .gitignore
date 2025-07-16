@@ -328,3 +328,5 @@ sketch
 # project specific
 ai_models/
 moosic.db
+*.env
+.spotify_cache

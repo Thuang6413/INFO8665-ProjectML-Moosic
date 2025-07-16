@@ -1,25 +1,36 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  frontend:
-    image: node:24.1
-    working_dir: /app
+  backend:
+    image: thuang6413/moosic-backend-cpu:2.0
+    container_name: moosic-backend
+    ports:
+      - "5000:5000"
     volumes:
-      - ./frontend:/app
+      - ./backend/ai_models:/app/ai_models
+      - ./backend/moosic.db:/app/moosic.db
+      - ./backend/.spotify_cache:/app/.spotify_cache
+    env_file:
+      - docker-compose.env
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_PATH=/app/moosic.db
+    networks:
+      - moosic-network
+    restart: unless-stopped
+
+  frontend:
+    image: thuang6413/moosic-frontend:2.0
+    container_name: moosic-frontend
     ports:
       - "3000:3000"
-    command: sh -c "npm install && npm start"
+    networks:
+      - moosic-network
+    restart: unless-stopped
     depends_on:
       - backend
 
-  backend:
-    image: python:3.12
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-    ports:
-      - "5000:5000"
-    command: sh -c "pip install -r requirements.txt && python app.py"
-    environment:
-      FLASK_APP: app.py
-      FLASK_ENV: development
+networks:
+  moosic-network:
+    driver: bridge
