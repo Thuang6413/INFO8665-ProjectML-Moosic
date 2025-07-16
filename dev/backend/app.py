@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import os
 import logging
+from logging.handlers import TimedRotatingFileHandler
 
 # Ensure logs directory exists
 if not os.path.exists("logs"):
@@ -21,10 +22,12 @@ if not os.path.exists("logs"):
 logger = logging.getLogger("moosic_logger")
 logger.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler("logs/moosic.log")
+file_handler = TimedRotatingFileHandler(
+    "logs/moosic.log", when="midnight", interval=1, backupCount=7)
 file_handler.setLevel(logging.INFO)
 
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
