@@ -329,4 +329,4 @@ sketch
 ai_models/
 moosic.db
 *.env
-.spotify_cache
+*.spotify_cache
