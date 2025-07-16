@@ -1,6 +1,7 @@
 # dev/backend/routes/user_routes.py
 from flask import Blueprint, request, jsonify
-from services.auth_service import register_user, login_user
+from services.auth_service import register_user, login_user, logout_user, get_user_info, update_user_preferences
+from services.spotify_service import save_spotify_credential, get_spotify_credential
 from models import db, Token
 from utils.auth_utils import token_required
 import re
@@ -44,21 +45,55 @@ def login():
 @token_required
 def logout(token_data):
     token = request.headers.get('Authorization').replace('Bearer ', '')
-    token_obj = Token.query.filter_by(token=token).first()
-    if token_obj:
-        db.session.delete(token_obj)
-        db.session.commit()
-        return jsonify({"message": "Logged out successfully"}), 200
-    return jsonify({"error": "Token not found"}), 400
+    response, status = logout_user(token)
+    return jsonify(response), status
 
 
 @user_bp.route("", methods=["GET"])
 @token_required
 def get_user(token_data):
-    return jsonify({"username": token_data['username'], "preferences": {}})
+    try:
+        user_id = token_data['user_id']
+    except KeyError:
+        return jsonify({"error": "Invalid token payload"}), 401
+    response, status = get_user_info(user_id)
+    return jsonify(response), status
 
 
 @user_bp.route("", methods=["PUT"])
 @token_required
 def update_user(token_data):
-    return jsonify({"message": "User preferences updated"})
+    data = request.get_json()
+    try:
+        user_id = token_data['user_id']
+    except KeyError:
+        return jsonify({"error": "Invalid token payload"}), 401
+    response, status = update_user_preferences(user_id, data)
+    return jsonify(response), status
+
+
+@user_bp.route("/spotify-credential", methods=["POST"])
+@token_required
+def post_user_spotify_credential(token_data):
+    token = request.headers.get('Authorization').replace('Bearer ', '')
+    token_obj = Token.query.filter_by(token=token).first()
+    if not token_obj:
+        return jsonify({"error": "Token not found"}), 400
+    data = request.get_json()
+    try:
+        user_id = token_data['user_id']
+    except KeyError:
+        return jsonify({"error": "Invalid token payload"}), 401
+    response, status = save_spotify_credential(user_id, data)
+    return jsonify(response), status
+
+
+@user_bp.route("/spotify-credential", methods=["GET"])
+@token_required
+def get_user_spotify_credential(token_data):
+    try:
+        user_id = token_data['user_id']
+    except KeyError:
+        return jsonify({"error": "Invalid token payload"}), 401
+    response, status = get_spotify_credential(user_id)
+    return jsonify(response), status
