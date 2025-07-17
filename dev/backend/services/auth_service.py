@@ -100,7 +100,6 @@ def get_user_info(user_id):
         if credential:
             return {
                 "username": user.username,
-                "email": user.email,
                 "spotify_credential": {
                     "client_id": credential.client_id,
                     "client_secret": credential.client_secret,
@@ -113,7 +112,6 @@ def get_user_info(user_id):
         # If no credential, return basic user info
         return {
             "username": user.username,
-            "email": user.email,
             "spotify_credential": None
         }, 200
     except Exception as e:
