@@ -111,7 +111,7 @@ Saved data:
 
 ## 👨‍💻 Author
 
-Developed by the Moosic Team Led by the brilliant scholar **Mohammed Adeen Shaik**  
+Developed by the Moosic Team
 Built using TensorFlow, OpenCV, and Python.
 
 ---
