@@ -1,25 +1,106 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const Settings: React.FC = () => {
+  const [form, setForm] = useState({
+    username: '',
+    client_id: '',
+    client_secret: '',
+  });
+
+  const [authorizeEnabled, setAuthorizeEnabled] = useState(false);
+  const [submitDisabled, setSubmitDisabled] = useState(true);
+
   useEffect(() => {
     document.title = 'Moosic Settings';
-  }, []);
 
-  const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    spotifyKey: '',
-  });
+    const token = Cookies.get('token');
+    if (!token) return;
+
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/v1/user', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const { username, spotify_credential } = response.data;
+
+        const clientId = spotify_credential?.client_id || '';
+        const clientSecret = spotify_credential?.client_secret || '';
+
+        setForm({
+          username: username || '',
+          client_id: clientId,
+          client_secret: clientSecret,
+        });
+
+        const isComplete = clientId && clientSecret;
+        setAuthorizeEnabled(isComplete);
+        setSubmitDisabled(isComplete); // disable submit if data already complete
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    setAuthorizeEnabled(false);
+    setSubmitDisabled(false); // re-enable submit on change
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Updated user info:', form);
-    // You can connect this to your backend here
+    const token = Cookies.get('token');
+    if (!token) return;
+
+    try {
+      await axios.post(
+        'http://localhost:5000/api/v1/user/spotify-credential',
+        {
+          client_id: form.client_id,
+          client_secret: form.client_secret,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('Spotify credentials saved.');
+      setAuthorizeEnabled(true);
+      setSubmitDisabled(true); // disable after successful save
+    } catch (err) {
+      console.error('Error saving credentials:', err);
+      setAuthorizeEnabled(false);
+    }
+  };
+
+  const handleAuthorize = async () => {
+    const token = Cookies.get('token');
+    if (!token) return;
+
+    try {
+      const response = await axios.get('http://localhost:5000/api/v1/spotify/authorize', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { auth_url } = response.data;
+      if (auth_url) {
+        window.open(auth_url, '_blank');
+      }
+    } catch (err) {
+      console.error('Error getting Spotify authorization URL:', err);
+    }
   };
 
   return (
@@ -28,53 +109,69 @@ const Settings: React.FC = () => {
         <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8">Settings & Profile</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Full Name */}
+          {/* Username */}
           <div>
-            <label className="block text-sm font-semibold mb-2">Full Name</label>
+            <label className="block text-sm font-semibold mb-2">Username</label>
             <input
               type="text"
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              placeholder="Your full name"
-              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              name="username"
+              value={form.username}
+              readOnly
+              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl text-gray-400"
             />
           </div>
 
-          {/* Email */}
+          {/* Client ID */}
           <div>
-            <label className="block text-sm font-semibold mb-2">Email</label>
+            <label className="block text-sm font-semibold mb-2">Client ID</label>
             <input
-              type="email"
-              name="email"
-              value={form.email}
+              type="text"
+              name="client_id"
+              value={form.client_id}
               onChange={handleChange}
-              placeholder="you@example.com"
-              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400"
+              placeholder="Client ID"
             />
           </div>
 
-          {/* Spotify Key */}
+          {/* Client Secret */}
           <div>
-            <label className="block text-sm font-semibold mb-2">Spotify API Key</label>
+            <label className="block text-sm font-semibold mb-2">Client Secret</label>
             <input
               type="password"
-              name="spotifyKey"
-              value={form.spotifyKey}
+              name="client_secret"
+              value={form.client_secret}
               onChange={handleChange}
-              placeholder="Paste your Spotify key here"
-              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400"
+              placeholder="Client Secret"
             />
-            <p className="text-xs text-gray-400 mt-2">We'll never share your key. It’s only stored locally or securely.</p>
           </div>
 
-          {/* Submit */}
-          <div className="flex justify-center pt-4">
+          {/* Buttons */}
+          <div className="flex justify-between pt-4">
             <button
               type="submit"
-              className="px-8 py-3 bg-pink-700 hover:bg-pink-600 rounded-xl font-semibold shadow-lg transition-transform hover:scale-105"
+              disabled={submitDisabled}
+              className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition-transform ${
+                submitDisabled
+                  ? 'bg-gray-700 cursor-not-allowed'
+                  : 'bg-pink-700 hover:bg-pink-600 hover:scale-105'
+              }`}
             >
               Save Changes
+            </button>
+
+            <button
+              type="button"
+              onClick={handleAuthorize}
+              disabled={!authorizeEnabled}
+              className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition-transform ${
+                authorizeEnabled
+                  ? 'bg-green-600 hover:bg-green-500 hover:scale-105'
+                  : 'bg-gray-700 cursor-not-allowed'
+              }`}
+            >
+              Authorize
             </button>
           </div>
         </form>
