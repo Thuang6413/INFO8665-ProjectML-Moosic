@@ -1,27 +1,15 @@
-version: "3.8"
-
 services:
   backend:
-    image: thuang6413/moosic-backend-cpu:2.0
+    image: thuang6413/moosic-backend:3.1
     container_name: moosic-backend
     ports:
       - "5000:5000"
-    volumes:
-      - ./backend/ai_models:/app/ai_models
-      - ./backend/moosic.db:/app/moosic.db
-      - ./backend/.spotify_cache:/app/.spotify_cache
-    env_file:
-      - docker-compose.env
-    environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=development
-      - DATABASE_PATH=/app/moosic.db
     networks:
       - moosic-network
     restart: unless-stopped
 
   frontend:
-    image: thuang6413/moosic-frontend:2.0
+    image: thuang6413/moosic-frontend:3.0
     container_name: moosic-frontend
     ports:
       - "3000:3000"
