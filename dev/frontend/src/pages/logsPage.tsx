@@ -138,7 +138,7 @@ export default function LogsPage() {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logger</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-            </tr>
+                </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredLogs.map((log, index) => (
