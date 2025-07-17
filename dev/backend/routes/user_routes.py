@@ -83,7 +83,6 @@ def post_user_spotify_credential(token_data):
     try:
         user_id = token_data['user_id']
     except KeyError:
-
         return jsonify({"error": "Invalid token payload"}), 401
     response, status = save_spotify_credential(user_id, data)
     return jsonify(response), status
