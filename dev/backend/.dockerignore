@@ -93,10 +93,10 @@ venv/
 */*/*/*.swp
 
 # mossic backend ignore files
-*.db
+# *.db
 *.sqlite3
-.spotify_cache
-.env
+# .spotify_cache
+# .env
 logs/*
 *.log
 # ai_models/*

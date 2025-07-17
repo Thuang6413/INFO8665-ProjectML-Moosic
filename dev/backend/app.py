@@ -5,6 +5,7 @@ from routes.user_routes import user_bp
 from routes.emotion_routes import emotion_bp
 from routes.music_routes import music_bp
 from routes.model_routes import model_bp
+from routes.log_routes import log_bp
 # Add import for spotify_callback
 from routes.spotify_routes import spotify_bp, spotify_callback
 from routes import log_request
@@ -83,6 +84,7 @@ app.register_blueprint(spotify_bp, url_prefix="/api/v1/spotify")
 app.add_url_rule('/spotify/callback',
                  # Use the function directly
                  view_func=spotify_callback, methods=['GET'])
+app.register_blueprint(log_bp, url_prefix="/api/v1/log")
 
 
 # Register error handlers
