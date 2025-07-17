@@ -15,7 +15,7 @@ def register():
     data = request.get_json()
     logger.info(f"Received registration data: {data}")
     try:
-        if not data or not data.get("username") or not data.get("password") or not data.get("email"):
+        if not data or not data.get("username") or not data.get("password"):
             return jsonify({"error": "Missing required fields"}), 400
         if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$", data["password"]):
             return jsonify({"error": "Password must be at least 8 characters with letters and numbers"}), 400

@@ -13,7 +13,6 @@ def register_user(data):
         user = User(
             username=data["username"],
             password_hash=hash_password(data["password"]),
-            email=data["email"]
         )
         db.session.add(user)
         db.session.commit()
@@ -46,7 +45,8 @@ def login_user(data):
     try:
         user = User.query.filter_by(username=data["username"]).first()
         if not user or not check_password(data["password"], user.password_hash):
-            logger.warning(f"Invalid login attempt for {data['username']}")
+            logger.warning(
+                f"Invalid login attempt for {data['username']}, password from user data: {data['password']}, password hash from user: {user.password_hash if user else 'N/A'}")
             return {"error": "Invalid credentials"}, 401
 
         # Generate and save JWT

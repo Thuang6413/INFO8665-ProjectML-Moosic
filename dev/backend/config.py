@@ -1,6 +1,7 @@
 # dev/backend/config.py
 import os
 
+
 class Config:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -21,4 +22,10 @@ class Config:
     # Spotify API Configuration
     CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID', 'default_client_id')
     CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET', 'default_client_secret')
-    REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5001/callback')  # Ensure consistency
+    REDIRECT_URI = os.getenv(
+        'SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5000/spotify/callback')  # Ensure consistency
+
+    # Spotify Callback URLs
+    SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
+    SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
+    SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-private streaming'

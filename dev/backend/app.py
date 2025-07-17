@@ -5,6 +5,9 @@ from routes.user_routes import user_bp
 from routes.emotion_routes import emotion_bp
 from routes.music_routes import music_bp
 from routes.model_routes import model_bp
+# Add import for spotify_callback
+from routes.spotify_routes import spotify_bp, spotify_callback
+from routes import log_request
 from utils.error_handlers import register_error_handlers
 from models import db
 from config import Config
@@ -68,11 +71,19 @@ app.config.from_object(Config)
 # Initialize the database
 db.init_app(app)
 
+# Register global before_request
+app.before_request(log_request)
 # Register Blueprint routes
 app.register_blueprint(user_bp, url_prefix="/api/v1/user")
 app.register_blueprint(emotion_bp, url_prefix="/api/v1/emotion")
 app.register_blueprint(music_bp, url_prefix="/api/v1/music")
 app.register_blueprint(model_bp, url_prefix="/api/v1/model")
+app.register_blueprint(spotify_bp, url_prefix="/api/v1/spotify")
+# Register Spotify callback route
+app.add_url_rule('/spotify/callback',
+                 # Use the function directly
+                 view_func=spotify_callback, methods=['GET'])
+
 
 # Register error handlers
 register_error_handlers(app)
