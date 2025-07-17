@@ -99,4 +99,4 @@ venv/
 .env
 logs/*
 *.log
-ai_models/*
+# ai_models/*

@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const CameraComponent: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraOn, setCameraOn] = useState(false);
-  const [usingFrontCamera] = useState(true); // You can toggle this later if needed
+  const [usingFrontCamera] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const navigate = useNavigate();
 
   const startCamera = async () => {
     if (streamRef.current) {
@@ -45,48 +49,52 @@ const CameraComponent: React.FC = () => {
     return () => stopCamera();
   }, [cameraOn]);
 
-const handleCapture = async () => {
-  const video = videoRef.current;
-  if (!video || !video.srcObject) return;
+  const handleCapture = async () => {
+    const video = videoRef.current;
+    if (!video || !video.srcObject) return;
 
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  canvas.toBlob(async (blob) => {
-    if (!blob) return;
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
 
-    const formData = new FormData();
-    formData.append('image', blob, 'capture.png');
+      const formData = new FormData();
+      formData.append('image', blob, 'capture.png');
 
-    try {
-      const response = await fetch('http://127.0.0.1:5000/api/v1/emotion/face', {
-        method: 'POST',
-        body: formData,
-      });
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/v1/emotion/face', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const result = await response.json();
-      console.log('Server response:', result);
-    } catch (err) {
-      console.error('Error uploading binary image:', err);
+        const result = await response.json();
+        console.log('Server response:', result);
+      } catch (err) {
+        console.error('Error uploading binary image:', err);
+      }
+    }, 'image/png');
+  };
+
+  const handleToggleCamera = () => {
+    const isLoggedIn = !!Cookies.get('token');
+    if (!isLoggedIn) {
+      setShowPopup(true);
+      return;
     }
-  }, 'image/png');
-};
-
-
+    setCameraOn(!cameraOn);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-pink-900 flex items-center justify-center text-white font-sans">
       <div className="w-full max-w-md p-4 rounded-2xl shadow-2xl bg-gray-950/70 border border-pink-900 relative">
 
         {/* Logo */}
-        <div className="flex justify-center mb-0">
-          <img src="/logo-white.png" alt="Logo" className="h-20 w-20" />
-        </div>
         <h1 className="text-white text-center font-bold mb-1">Moosic</h1>
 
         {/* Camera */}
@@ -102,7 +110,7 @@ const handleCapture = async () => {
               type="checkbox"
               className="sr-only peer"
               checked={cameraOn}
-              onChange={() => setCameraOn(!cameraOn)}
+              onChange={handleToggleCamera}
             />
             <div className="w-14 h-7 bg-gray-600 rounded-full peer-checked:bg-pink-600 transition-colors duration-300" />
             <div className="absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-7" />
@@ -135,6 +143,27 @@ const handleCapture = async () => {
           Your image will be used to personalize your music experience,<br />We respect your privacy.
         </p>
       </div>
+
+      {/* ❗ Login Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-950 border border-pink-800 p-6 rounded-2xl shadow-xl text-center max-w-sm">
+            <p className="text-white text-lg mb-4">Sorry, you have to login first.</p>
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-pink-700 hover:bg-pink-600 px-4 py-2 rounded-lg text-white"
+            >
+              Go to Login
+            </button>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="ml-4 text-gray-400 hover:text-white text-sm underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
