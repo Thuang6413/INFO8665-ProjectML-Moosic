@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Link } from 'react-router-dom';
+
 
 const Settings: React.FC = () => {
   const [form, setForm] = useState({
@@ -27,7 +31,6 @@ const Settings: React.FC = () => {
         });
 
         const { username, spotify_credential } = response.data;
-
         const clientId = spotify_credential?.client_id || '';
         const clientSecret = spotify_credential?.client_secret || '';
 
@@ -39,7 +42,7 @@ const Settings: React.FC = () => {
 
         const isComplete = clientId && clientSecret;
         setAuthorizeEnabled(isComplete);
-        setSubmitDisabled(isComplete); // disable submit if data already complete
+        setSubmitDisabled(isComplete);
       } catch (err) {
         console.error('Error fetching user data:', err);
       }
@@ -50,9 +53,15 @@ const Settings: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const updatedForm = { ...form, [name]: value };
+    setForm(updatedForm);
+
+    const isValidClientId =
+      updatedForm.client_id.length === 32 && /^[a-f0-9]+$/.test(updatedForm.client_id);
+    const isValidSecret = updatedForm.client_secret.length > 10;
+
     setAuthorizeEnabled(false);
-    setSubmitDisabled(false); // re-enable submit on change
+    setSubmitDisabled(!(isValidClientId && isValidSecret));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,12 +69,32 @@ const Settings: React.FC = () => {
     const token = Cookies.get('token');
     if (!token) return;
 
+    const { client_id, client_secret } = form;
+
+    if (!client_id || !client_secret) {
+      toast.warn('Please fill in both Client ID and Client Secret.');
+      return;
+    }
+
+    const isValidClientId = client_id.length === 32 && /^[a-f0-9]+$/.test(client_id);
+    const isValidSecret = client_secret.length > 10;
+
+    if (!isValidClientId) {
+      toast.warn('Client ID must be 32-character lowercase hexadecimal.');
+      return;
+    }
+
+    if (!isValidSecret) {
+      toast.warn('Client Secret must be more than 10 characters.');
+      return;
+    }
+
     try {
       await axios.post(
         'http://localhost:5000/api/v1/user/spotify-credential',
         {
-          client_id: form.client_id,
-          client_secret: form.client_secret,
+          client_id,
+          client_secret,
         },
         {
           headers: {
@@ -74,11 +103,12 @@ const Settings: React.FC = () => {
         }
       );
 
-      console.log('Spotify credentials saved.');
+      toast.success('Spotify credentials saved.');
       setAuthorizeEnabled(true);
-      setSubmitDisabled(true); // disable after successful save
+      setSubmitDisabled(true);
     } catch (err) {
       console.error('Error saving credentials:', err);
+      toast.error('Failed to save credentials.');
       setAuthorizeEnabled(false);
     }
   };
@@ -106,6 +136,16 @@ const Settings: React.FC = () => {
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-pink-900 text-white font-sans flex items-center justify-center px-4">
       <div className="w-full max-w-2xl p-6 rounded-2xl shadow-2xl bg-gray-950/80 border border-pink-700">
+        {/* Back to Music Button */}
+        <div className="mb-6">
+          <Link
+            to="/" // Change this to your desired route
+            className="inline-flex items-center text-pink-400 hover:text-pink-300 transition-colors font-medium text-sm"
+          >
+            <span className="text-xl mr-2">←</span> Back to Get Your Music
+          </Link>
+        </div>
+
         <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8">Settings & Profile</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -129,9 +169,16 @@ const Settings: React.FC = () => {
               name="client_id"
               value={form.client_id}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400"
+              className={`w-full px-4 py-3 bg-gray-800 border rounded-xl placeholder-gray-400 ${
+                form.client_id && form.client_id.length !== 32
+                  ? 'border-red-500'
+                  : 'border-pink-700'
+              }`}
               placeholder="Client ID"
             />
+            {form.client_id && form.client_id.length !== 32 && (
+              <p className="text-sm text-red-400 mt-1">Client ID must be 32 characters.</p>
+            )}
           </div>
 
           {/* Client Secret */}
@@ -142,9 +189,16 @@ const Settings: React.FC = () => {
               name="client_secret"
               value={form.client_secret}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl placeholder-gray-400"
+              className={`w-full px-4 py-3 bg-gray-800 border rounded-xl placeholder-gray-400 ${
+                form.client_secret && form.client_secret.length <= 10
+                  ? 'border-red-500'
+                  : 'border-pink-700'
+              }`}
               placeholder="Client Secret"
             />
+            {form.client_secret && form.client_secret.length <= 10 && (
+              <p className="text-sm text-red-400 mt-1">Client Secret must be more than 10 characters.</p>
+            )}
           </div>
 
           {/* Buttons */}
@@ -179,6 +233,8 @@ const Settings: React.FC = () => {
         <p className="text-center text-xs text-gray-500 mt-6">
           Powered by <span className="text-pink-400 font-semibold">Moosic</span>
         </p>
+
+        <ToastContainer position="bottom-center" autoClose={3000} hideProgressBar />
       </div>
     </section>
   );

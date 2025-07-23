@@ -49,37 +49,43 @@ const CameraComponent: React.FC = () => {
     return () => stopCamera();
   }, [cameraOn]);
 
-  const handleCapture = async () => {
-    const video = videoRef.current;
-    if (!video || !video.srcObject) return;
+const handleCapture = async () => {
+  const video = videoRef.current;
+  if (!video || !video.srcObject) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
+  canvas.toBlob(async (blob) => {
+    if (!blob) return;
 
-      const formData = new FormData();
-      formData.append('image', blob, 'capture.png');
+    const formData = new FormData();
+    formData.append('image', blob, 'capture.png');
 
-      try {
-        const response = await fetch('http://127.0.0.1:5000/api/v1/emotion/face', {
-          method: 'POST',
-          body: formData,
-        });
+    const token = Cookies.get('token');
 
-        const result = await response.json();
-        console.log('Server response:', result);
-      } catch (err) {
-        console.error('Error uploading binary image:', err);
-      }
-    }, 'image/png');
-  };
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/v1/emotion/face', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log('Server response:', result);
+    } catch (err) {
+      console.error('Error uploading binary image:', err);
+    }
+  }, 'image/png');
+};
+
 
   const handleToggleCamera = () => {
     const isLoggedIn = !!Cookies.get('token');
