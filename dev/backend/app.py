@@ -24,11 +24,11 @@ if not os.path.exists("logs"):
 
 # Configure logging
 logger = logging.getLogger("moosic_logger")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 file_handler = TimedRotatingFileHandler(
     "logs/moosic.log", when="midnight", interval=1, backupCount=7)
-file_handler.setLevel(logging.INFO)
+file_handler.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)s - %(message)s")

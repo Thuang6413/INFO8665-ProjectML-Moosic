@@ -11,7 +11,8 @@ class Config:
     }
 
     # Database Configuration
-    DATABASE_PATH = os.path.join(BASE_DIR, 'moosic.db')
+    DATABASE_NAME = os.getenv('DATABASE_NAME', 'moosic.db')
+    DATABASE_PATH = os.path.join(BASE_DIR, DATABASE_NAME)
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{DATABASE_PATH}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

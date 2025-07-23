@@ -2,12 +2,20 @@
 from flask import Blueprint, request, jsonify
 from services.emotion_inference import predict_emotion
 from . import logger
+from utils.auth_utils import token_required
 
 emotion_bp = Blueprint("emotion", __name__)
 
 
 @emotion_bp.route("/face", methods=["POST"])
-def detect_emotion_face():
+@token_required
+def detect_emotion_face(token_data):
+    # check user authentication
+    try:
+        user_id = token_data['user_id']
+    except KeyError:
+        return jsonify({"error": "Invalid token payload"}), 401
+    # check if image is provided
     if 'image' not in request.files:
         return jsonify({"error": "Missing 'image' parameter"}), 400
 
@@ -17,7 +25,7 @@ def detect_emotion_face():
         model_name = "emotion_face_fer2013"
 
     logger.debug(f"Using model: {model_name} for emotion detection")
-    emotion = predict_emotion(image, model_name)
+    emotion = predict_emotion(image, model_name, user_id)
     return emotion  # Directly return the JSON response from predict_emotion
 
 

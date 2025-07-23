@@ -1,5 +1,5 @@
 # dev/backend/routes/spotify_routes.py
-from flask import Blueprint, request, jsonify, redirect
+from flask import Blueprint, request, jsonify, redirect, current_app
 from services.spotify_service import generate_spotify_auth_url, handle_spotify_callback
 from utils.auth_utils import token_required
 
@@ -32,5 +32,5 @@ def spotify_callback():
     response, status = handle_spotify_callback(code, state)
     if status == 200:
         # Redirect to frontend success page
-        return redirect("http://127.0.0.1:3000/success")
+        return redirect(current_app.config.get('FRONTEND_URL', 'http://127.0.1:3000'))
     return jsonify(response), status

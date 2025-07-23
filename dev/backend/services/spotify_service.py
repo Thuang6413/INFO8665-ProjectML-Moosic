@@ -1,3 +1,4 @@
+# dev/services/spotify_service.py
 import secrets
 from models import db, UserSpotifyCredential
 from . import logger  # Assume logger is imported from services/__init__.py
@@ -6,7 +7,6 @@ import base64
 from datetime import datetime, timedelta
 from flask import current_app
 from spotipy.oauth2 import SpotifyOAuth
-import os
 
 
 def save_spotify_credential(user_id, data):
@@ -83,9 +83,7 @@ def generate_spotify_auth_url(user_id):
             client_secret=credential.client_secret,
             redirect_uri=redirect_uri,
             scope=scope,
-            show_dialog=True,
-            cache_path=os.path.join(current_app.root_path, '.spotify_cache'),
-            state=state  # Pass the state here
+            show_dialog=True
         )
         auth_url = auth_manager.get_authorize_url()
         return {"auth_url": auth_url}, 200
@@ -119,8 +117,7 @@ def handle_spotify_callback(code, state):
             client_secret=credential.client_secret,
             redirect_uri=redirect_uri,
             scope=scope,
-            show_dialog=True,
-            cache_path=os.path.join(current_app.root_path, '.spotify_cache')
+            show_dialog=True
         )
 
         # Exchange code for token using SpotifyOAuth
