@@ -23,7 +23,8 @@ def get_spotify_client(user_id):
         auth_manager = SpotifyOAuth(
             client_id=credential.client_id,
             client_secret=credential.client_secret,
-            redirect_uri=Config.REDIRECT_URI
+            redirect_uri=Config.REDIRECT_URI,
+            scope=Config.SPOTIFY_SCOPES,
         )
         try:
             token_info = auth_manager.refresh_access_token(

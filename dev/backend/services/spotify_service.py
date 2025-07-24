@@ -71,7 +71,7 @@ def generate_spotify_auth_url(user_id):
             return {"error": "No Spotify credentials found for user"}, 404
 
         scope = current_app.config.get(
-            'SPOTIFY_SCOPE', 'user-read-playback-state user-modify-playback-state user-read-private streaming')
+            'SPOTIFY_SCOPES', 'user-read-playback-state user-modify-playback-state user-read-private streaming')
         redirect_uri = current_app.config.get(
             'SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5000/spotify/callback')
 
@@ -83,7 +83,8 @@ def generate_spotify_auth_url(user_id):
             client_secret=credential.client_secret,
             redirect_uri=redirect_uri,
             scope=scope,
-            show_dialog=True
+            show_dialog=True,
+            state=state
         )
         auth_url = auth_manager.get_authorize_url()
         return {"auth_url": auth_url}, 200
@@ -94,8 +95,9 @@ def generate_spotify_auth_url(user_id):
         return {"error": f"Failed to generate auth URL: {str(e)}"}, 500
 
 
-def handle_spotify_callback(code, state):
+def handle_spotify_callback(code, state=None):
     try:
+
         # Parse state to get user_id
         decoded_state = base64.b64decode(state).decode()
         # Ignore random part, only get user_id
@@ -110,7 +112,7 @@ def handle_spotify_callback(code, state):
         redirect_uri = current_app.config.get(
             'SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5000/spotify/callback')
         scope = current_app.config.get(
-            'SPOTIFY_SCOPE', 'user-read-playback-state user-modify-playback-state user-read-private streaming')
+            'SPOTIFY_SCOPES', 'user-read-playback-state user-modify-playback-state user-read-private streaming')
 
         auth_manager = SpotifyOAuth(
             client_id=credential.client_id,

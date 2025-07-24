@@ -30,3 +30,5 @@ class Config:
     SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
     SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
     SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-private streaming'
+
+    FROENTEND_URL = os.getenv('FROENTEND_URL', 'http://127.0.0.1:3000')
