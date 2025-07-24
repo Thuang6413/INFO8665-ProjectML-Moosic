@@ -26,7 +26,7 @@ This project captures real-time video frames, detects faces, and predicts emotio
 ## 📁 Use Case Directory Structure
 
 ```
-Emotion Detection use case 1/
+training/
 ├── Emotion_Recognition_Model_Training.ipynb               # Trains the emotion recognition model
 ├── Emotion_Detection_Model_Deployment.ipynb            # Runs webcam inference and captures data
 ├── Emotion_Recognition_Model.h5   # Trained Keras model
