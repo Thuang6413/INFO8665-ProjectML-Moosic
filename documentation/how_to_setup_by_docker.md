@@ -27,6 +27,15 @@ docker network create --driver bridge moosic-network
 
 #### 2. Run the Backend Service
 
+Follow the `docker-compose.env`:
+```
+JWT_SECRET_KEY=your-very-secure-random-key
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:5000/spotify/callback
+FROENTEND_URL=http://127.0.0.1:3000
+DATABASE_NAME=moosic.db
+SPOTIFY_SCOPES="user-read-playback-state user-modify-playback-state user-read-private streaming"
+```
+
 Start the backend container:
 
 ```bash
