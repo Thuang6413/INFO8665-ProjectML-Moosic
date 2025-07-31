@@ -95,7 +95,7 @@ The notebook is structured in several key stages:
     * **Phase 1**: Trains only the new layers on top of the frozen base model.
     * **Phase 2**: Unfreezes the base model and continues training with a very low learning rate to fine-tune all layers.
 
-The best-performing model is automatically saved as **`moosic_model.h5`**.
+The best-performing model is automatically saved as **`mood_predictor.h5`**.
 
 ---
 ## 👨‍💻 Author
