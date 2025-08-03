@@ -1,6 +1,6 @@
 services:
   backend:
-    image: thuang6413/moosic-backend:3.2.1
+    image: thuang6413/moosic-backend:3.3
     container_name: moosic-backend
     env_file:
       - docker-compose.env
