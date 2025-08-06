@@ -1,4 +1,3 @@
-# dev/backend/services/emotion_inference.py
 import numpy as np
 import cv2
 import tensorflow as tf
@@ -13,7 +12,6 @@ EMOTION_LABELS = ["angry", "disgust", "fear",
 
 def preprocess_image(image_file, target_shape):
     """Preprocess image according to model's input shape."""
-    # Load image as color (for flexibility)
     image = cv2.imdecode(np.frombuffer(
         image_file.read(), np.uint8), cv2.IMREAD_COLOR)
     if image is None:
@@ -21,7 +19,6 @@ def preprocess_image(image_file, target_shape):
 
     height, width, channels = target_shape[1:]
 
-    # Convert to grayscale if target channel = 1
     if channels == 1:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         image = cv2.resize(image, (width, height))
@@ -31,7 +28,7 @@ def preprocess_image(image_file, target_shape):
         image = cv2.resize(image, (width, height))
 
     image = image.astype("float32") / 255.0
-    image_array = np.expand_dims(image, axis=0)  # Add batch dimension
+    image_array = np.expand_dims(image, axis=0)
 
     return image_array
 
@@ -51,7 +48,7 @@ def predict_emotion(image_file, model_name=None, user_id=None):
             raise ValueError(f"Model '{model_name}' not available")
 
         model = models[model_name]
-        target_shape = model.input_shape  # e.g. (None, 224, 224, 3)
+        target_shape = model.input_shape
         logger.debug(f"[DEBUG] Model input shape: {target_shape}")
 
         image_file.seek(0)
@@ -59,14 +56,11 @@ def predict_emotion(image_file, model_name=None, user_id=None):
         logger.debug(
             f"[DEBUG] Image preprocessed successfully with shape: {image_array.shape}")
 
-        # Perform prediction
         predictions = model.predict(image_array)
         logger.debug(
             f"[DEBUG] Raw predictions: {predictions}, type: {type(predictions)}, shape: {getattr(predictions, 'shape', 'No shape attribute')}")
 
-        # Process predictions based on model type
         if model_name == "emotion_face_fer2013":
-            # Ensure predictions is a NumPy array
             if isinstance(predictions, list):
                 predictions = np.array(predictions, dtype=np.float32)
             if len(predictions.shape) == 1:
@@ -84,59 +78,52 @@ def predict_emotion(image_file, model_name=None, user_id=None):
                 "happy": 0.9, "sad": -0.4, "surprise": 0.6, "neutral": 0.0
             }
             predicted_valence = valence_map.get(emotion, 0.0)
+            standardized_valence = (predicted_valence + 1) / 2 * 7
+            standardized_arousal = None
         else:  # mood_predictor
-            if isinstance(predictions, list) and len(predictions) >= 1:
-                # Assume first output is valence (shape (1, 1))
-                valence_output = predictions[0]
-                arousal_output = predictions[1]
-                expression_output = predictions[2]
-
-                if isinstance(valence_output, np.ndarray) and valence_output.shape == (1, 1):
-                    predicted_valence = float(valence_output[0, 0])
-                else:
-                    raise ValueError(
-                        f"Unexpected valence output shape: {valence_output.shape}")
-                # log with valence[0], arousal[1], and expression[2]
+            if isinstance(predictions, (list, tuple)) and len(predictions) >= 2:
+                # Extract scalar values
+                predicted_valence = float(np.squeeze(predictions[0]))
+                predicted_arousal = float(np.squeeze(predictions[1]))
+                expression_output = np.squeeze(
+                    predictions[2]) if len(predictions) > 2 else None
                 logger.debug(
-                    f"[DEBUG] Mood predictor outputs: Valence: {predicted_valence}, Arousal: {arousal_output}, Expression: {expression_output}")
-
-                logger.debug(
-                    f"[DEBUG] Direct valence prediction: {predicted_valence}")
-                # Log other outputs for debugging
-                logger.debug(f"[DEBUG] Additional outputs: {predictions[1:]}")
+                    f"[DEBUG] Mood predictor outputs: Valence: {predicted_valence}, Arousal: {predicted_arousal}, Expression: {expression_output}")
+                standardized_valence = (predicted_valence + 1) / 2 * 7
+                standardized_arousal = (predicted_arousal + 1) / 2 * 7
                 emotion = "N/A"
             else:
                 raise ValueError(
                     f"Unexpected predictions format for mood_predictor: {predictions}")
 
-        # Standardize valence to [0, 7]
-        if model_name == "emotion_face_fer2013":
-            standardized_valence = (predicted_valence + 1) / 2 * 7
-        else:
-            # Assuming mood_predictor outputs valence in range [-1, 1]
-            standardized_valence = (predicted_valence + 1) / 2 * 7
-            standardized_arousal = (arousal_output + 1) / 2 * 7
-
-        logger.debug(f"[DEBUG] Standardized valence: {standardized_valence}")
+        logger.debug(
+            f"[DEBUG] Standardized valence: {standardized_valence}, arousal: {standardized_arousal}")
 
         try:
             recommended_song = recommend_song_by_valence(
-                standardized_valence, target_arousal, user_id)
+                standardized_valence, standardized_arousal, user_id)
             recommended_song_name = recommended_song["track_name"] if recommended_song else "No song found"
             recommended_song_url = f"https://open.spotify.com/track/{recommended_song['spotify_id']}" if recommended_song else ""
+            recommended_valence = recommended_song["valence"] if recommended_song else None
+            recommended_arousal = recommended_song["arousal"] if recommended_song else None
         except Exception as e:
             logger.debug(f"[WARNING] Song recommendation failed: {e}")
             recommended_song_name = "Recommendation failed"
             recommended_song_url = ""
+            recommended_valence = None
+            recommended_arousal = None
 
         response = {
             "emotion": emotion,
             "valence": round(standardized_valence, 2),
+            "arousal": round(standardized_arousal, 2) if standardized_arousal is not None else None,
             "recommended_song_name": recommended_song_name,
-            "recommended_song_url": recommended_song_url
+            "recommended_song_url": recommended_song_url,
+            "recommended_valence": recommended_valence,
+            "recommended_arousal": recommended_arousal
         }
         return jsonify(response)
 
     except Exception as e:
-        logger.error(f"[ERROR] Emotion prediction failed: {e}")
-        return jsonify({"error": "Unable to predict emotion"})
+        logger.error(f"[ERROR] Emotion prediction failed: {str(e)}")
+        return jsonify({"error": f"Emotion prediction failed: {str(e)}"}), 500

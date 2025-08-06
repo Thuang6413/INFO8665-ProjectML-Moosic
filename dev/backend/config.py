@@ -30,6 +30,11 @@ class Config:
     # Spotify Callback URLs
     SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
     SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
-    SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-private streaming'
+    SPOTIFY_SCOPES = 'user-read-email user-read-playback-state user-modify-playback-state user-read-private streaming'
+    SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID', 'default_client_id')
+    SPOTIFY_CLIENT_SECRET = os.getenv(
+        'SPOTIFY_CLIENT_SECRET', 'default_client_secret')
+    SPOTIFY_REDIRECT_URI = os.getenv(
+        'SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5000/spotify/callback')
 
     FROENTEND_URL = os.getenv('FROENTEND_URL', 'http://127.0.0.1:3000')

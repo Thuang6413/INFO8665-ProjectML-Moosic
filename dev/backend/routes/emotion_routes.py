@@ -22,7 +22,7 @@ def detect_emotion_face(token_data):
     image = request.files["image"]
     model_name = request.form.get("model")  # Get model name from form data
     if not model_name:
-        model_name = "emotion_face_fer2013"
+        model_name = "mood_predictor"
 
     logger.debug(f"Using model: {model_name} for emotion detection")
     emotion = predict_emotion(image, model_name, user_id)

@@ -1,6 +1,5 @@
-# dev/services/spotify_service.py
 import secrets
-from models import db, User, UserSpotifyCredential
+from models import db, User, UserSpotifyCredential, Token
 from . import logger
 import requests
 import base64
@@ -8,6 +7,8 @@ from datetime import datetime, timedelta
 from flask import current_app
 from spotipy.oauth2 import SpotifyOAuth
 from utils.auth_utils import generate_token
+from config import Config
+import spotipy
 
 
 def save_spotify_credential(user_id, data):
@@ -22,7 +23,6 @@ def save_spotify_credential(user_id, data):
             credential.expires_at = data.get('expires_at')
             logger.info(f"Updated Spotify credential for user_id: {user_id}")
         else:
-            # Create new credential if not exists
             credential = UserSpotifyCredential(
                 user_id=user_id,
                 client_id=data.get('client_id'),
@@ -45,7 +45,6 @@ def save_spotify_credential(user_id, data):
 
 def get_spotify_credential(user_id):
     try:
-        # Retrieve credential for the given user_id
         credential = UserSpotifyCredential.query.filter_by(
             user_id=user_id).first()
         if not credential:
@@ -87,6 +86,7 @@ def generate_spotify_auth_url(user_id):
             state=state
         )
         auth_url = auth_manager.get_authorize_url()
+        logger.debug(f"Generated Spotify auth_url: {auth_url}")
         return {"auth_url": auth_url}, 200
     except Exception as e:
         logger.error(
@@ -110,6 +110,8 @@ def handle_spotify_callback(code, state=None):
         scope = current_app.config.get(
             'SPOTIFY_SCOPES', 'user-read-playback-state user-modify-playback-state user-read-private streaming')
 
+        logger.debug(f"Handling Spotify callback for user_id: {user_id}")
+        logger.debug(f"Using redirect_uri: {redirect_uri}, scope: {scope}")
         auth_manager = SpotifyOAuth(
             client_id=credential.client_id,
             client_secret=credential.client_secret,
@@ -119,16 +121,12 @@ def handle_spotify_callback(code, state=None):
         )
 
         token_info = auth_manager.get_access_token(code)
-
-        # Update DB
         credential.access_token = token_info['access_token']
         credential.refresh_token = token_info.get('refresh_token')
         credential.expires_at = datetime.utcnow(
         ) + timedelta(seconds=token_info['expires_in'])
         db.session.commit()
         logger.info(f"Spotify tokens saved for user_id: {user_id}")
-
-        # Or redirect to frontend
         return {"message": "Spotify authorization successful"}, 200
     except Exception as e:
         db.session.rollback()
@@ -136,27 +134,35 @@ def handle_spotify_callback(code, state=None):
         return {"error": str(e)}, 500
 
 
-# Helper function: generate random string
 def generate_random_string(length):
     return secrets.token_hex(length // 2)
 
 
 def handle_spotify_sso_callback(code, state=None):
+    print(f"Handling Spotify SSO callback with code: {code}, state: {state}")
     try:
-        # Initialize Spotify OAuth without user-specific credentials (use app-wide credentials)
-        redirect_uri = current_app.config.get(
-            'SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5000/auth/spotify/callback')
-        scope = 'user-read-private user-read-email'  # Scopes for SSO
+        # Initialize Spotify OAuth with app-wide credentials
+        redirect_sso_uri = current_app.config.get(
+            'SPOTIFY_REDIRECT_SSO_URI', 'http://127.0.0.1:5000/sso/callback')
+        scope = current_app.config.get(
+            'SPOTIFY_SCOPES', 'user-read-playback-state user-modify-playback-state user-read-private streaming')
+        logger.debug(
+            f"SSO callback redirect_sso_uri: {redirect_sso_uri}, scope: {scope}")
         auth_manager = SpotifyOAuth(
             client_id=Config.SPOTIFY_CLIENT_ID,
             client_secret=Config.SPOTIFY_CLIENT_SECRET,
-            redirect_uri=redirect_uri,
+            redirect_uri=redirect_sso_uri,
             scope=scope,
-            show_dialog=True
+            show_dialog=True,
+            cache_path=None  # Disable cache
         )
 
         # Exchange code for tokens
         token_info = auth_manager.get_access_token(code)
+        if not token_info:
+            logger.error("Failed to retrieve token_info")
+            return {"error": "Failed to retrieve access token"}, 400
+
         access_token = token_info['access_token']
         refresh_token = token_info.get('refresh_token')
         expires_at = datetime.utcnow(
@@ -167,6 +173,8 @@ def handle_spotify_sso_callback(code, state=None):
         user_profile = sp.current_user()
         spotify_user_id = user_profile['id']
         email = user_profile.get('email', '')
+
+        logger.debug(f"Full Spotify user profile: {user_profile}")
 
         # Check if user exists with this Spotify ID
         user = User.query.filter_by(spotify_user_id=spotify_user_id).first()
@@ -219,5 +227,8 @@ def handle_spotify_sso_callback(code, state=None):
         }, 200
     except Exception as e:
         db.session.rollback()
+        # print where the error occurred and specific line number
+        print(
+            f"Error in handle_spotify_sso_callback: {e} at line {e.__traceback__.tb_lineno}")
         logger.error(f"Spotify SSO callback failed: {str(e)}")
         return {"error": str(e)}, 500
