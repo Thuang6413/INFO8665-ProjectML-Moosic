@@ -43,7 +43,7 @@ def get_spotify_client(user_id):
     return sp
 
 
-def recommend_song_by_valence(target_valence, user_id):
+def recommend_song_by_valence(target_valence, target_arousal, user_id):
     """
     Recommend and play a song from SQLite based on the target valence value.
     Returns the recommended song info or None if failed.
@@ -68,6 +68,8 @@ def recommend_song_by_valence(target_valence, user_id):
             if valence_diff < min_diff:
                 min_diff = valence_diff
                 closest_song = song
+
+            arousal_diff = abs(song.arousal_tags - target_arousal)
 
         logger.debug(
             f"Closest song found: {closest_song.track} by {closest_song.artist} with valence {closest_song.valence_tags}")

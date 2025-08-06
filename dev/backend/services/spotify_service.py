@@ -1,17 +1,17 @@
 # dev/services/spotify_service.py
 import secrets
-from models import db, UserSpotifyCredential
-from . import logger  # Assume logger is imported from services/__init__.py
+from models import db, User, UserSpotifyCredential
+from . import logger
 import requests
 import base64
 from datetime import datetime, timedelta
 from flask import current_app
 from spotipy.oauth2 import SpotifyOAuth
+from utils.auth_utils import generate_token
 
 
 def save_spotify_credential(user_id, data):
     try:
-        # Check if credential already exists, update if it does
         credential = UserSpotifyCredential.query.filter_by(
             user_id=user_id).first()
         if credential:
@@ -88,7 +88,6 @@ def generate_spotify_auth_url(user_id):
         )
         auth_url = auth_manager.get_authorize_url()
         return {"auth_url": auth_url}, 200
-
     except Exception as e:
         logger.error(
             f"Failed to generate Spotify auth URL for user_id {user_id}: {str(e)}")
@@ -97,10 +96,7 @@ def generate_spotify_auth_url(user_id):
 
 def handle_spotify_callback(code, state=None):
     try:
-
-        # Parse state to get user_id
         decoded_state = base64.b64decode(state).decode()
-        # Ignore random part, only get user_id
         user_id, _ = decoded_state.split(':')
         user_id = int(user_id)
 
@@ -122,7 +118,6 @@ def handle_spotify_callback(code, state=None):
             show_dialog=True
         )
 
-        # Exchange code for token using SpotifyOAuth
         token_info = auth_manager.get_access_token(code)
 
         # Update DB
@@ -144,3 +139,85 @@ def handle_spotify_callback(code, state=None):
 # Helper function: generate random string
 def generate_random_string(length):
     return secrets.token_hex(length // 2)
+
+
+def handle_spotify_sso_callback(code, state=None):
+    try:
+        # Initialize Spotify OAuth without user-specific credentials (use app-wide credentials)
+        redirect_uri = current_app.config.get(
+            'SPOTIFY_REDIRECT_URI', 'http://127.0.0.1:5000/auth/spotify/callback')
+        scope = 'user-read-private user-read-email'  # Scopes for SSO
+        auth_manager = SpotifyOAuth(
+            client_id=Config.SPOTIFY_CLIENT_ID,
+            client_secret=Config.SPOTIFY_CLIENT_SECRET,
+            redirect_uri=redirect_uri,
+            scope=scope,
+            show_dialog=True
+        )
+
+        # Exchange code for tokens
+        token_info = auth_manager.get_access_token(code)
+        access_token = token_info['access_token']
+        refresh_token = token_info.get('refresh_token')
+        expires_at = datetime.utcnow(
+        ) + timedelta(seconds=token_info['expires_in'])
+
+        # Get user profile from Spotify
+        sp = spotipy.Spotify(auth=access_token)
+        user_profile = sp.current_user()
+        spotify_user_id = user_profile['id']
+        email = user_profile.get('email', '')
+
+        # Check if user exists with this Spotify ID
+        user = User.query.filter_by(spotify_user_id=spotify_user_id).first()
+        if not user:
+            # Create new user
+            user = User(
+                username=email or f"spotify_{spotify_user_id}",
+                spotify_user_id=spotify_user_id
+            )
+            db.session.add(user)
+            db.session.commit()
+            logger.info(f"Created new user with Spotify ID: {spotify_user_id}")
+
+        # Save or update Spotify credentials
+        credential = UserSpotifyCredential.query.filter_by(
+            user_id=user.id).first()
+        if credential:
+            credential.access_token = access_token
+            credential.refresh_token = refresh_token
+            credential.expires_at = expires_at
+        else:
+            credential = UserSpotifyCredential(
+                user_id=user.id,
+                client_id=Config.SPOTIFY_CLIENT_ID,
+                client_secret=Config.SPOTIFY_CLIENT_SECRET,
+                access_token=access_token,
+                refresh_token=refresh_token,
+                expires_at=expires_at
+            )
+            db.session.add(credential)
+        db.session.commit()
+
+        # Generate JWT token
+        token = generate_token(user.id, user.username or user.spotify_user_id)
+        token_obj = Token(
+            token=token,
+            user_id=user.id,
+            expires_at=datetime.utcnow() +
+            timedelta(seconds=current_app.config['JWT_EXPIRATION_DELTA'])
+        )
+        db.session.add(token_obj)
+        db.session.commit()
+        logger.info(
+            f"SSO login successful for Spotify user: {spotify_user_id}")
+
+        return {
+            "message": "Spotify SSO login successful",
+            "token": token,
+            "user_id": user.id
+        }, 200
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Spotify SSO callback failed: {str(e)}")
+        return {"error": str(e)}, 500

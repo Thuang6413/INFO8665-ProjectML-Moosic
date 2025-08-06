@@ -115,12 +115,13 @@ def predict_emotion(image_file, model_name=None, user_id=None):
         else:
             # Assuming mood_predictor outputs valence in range [-1, 1]
             standardized_valence = (predicted_valence + 1) / 2 * 7
+            standardized_arousal = (arousal_output + 1) / 2 * 7
 
         logger.debug(f"[DEBUG] Standardized valence: {standardized_valence}")
 
         try:
             recommended_song = recommend_song_by_valence(
-                standardized_valence, user_id)
+                standardized_valence, target_arousal, user_id)
             recommended_song_name = recommended_song["track_name"] if recommended_song else "No song found"
             recommended_song_url = f"https://open.spotify.com/track/{recommended_song['spotify_id']}" if recommended_song else ""
         except Exception as e:

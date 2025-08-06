@@ -1,4 +1,3 @@
-# dev/backend/models/__init__.py
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -8,10 +7,13 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    username = db.Column(db.String(120), unique=True,
+                         nullable=True)  # Allow null for SSO users
+    # Allow null for SSO users
+    password_hash = db.Column(db.String(255), nullable=True)
+    # New field for Spotify SSO
+    spotify_user_id = db.Column(db.String(128), unique=True, nullable=True)
 
-    # One-to-one relationship with Spotify credentials
     spotify_credential = db.relationship(
         'UserSpotifyCredential', backref='user', uselist=False)
 
@@ -51,12 +53,11 @@ class UserSpotifyCredential(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id'), unique=True, nullable=False)
-    client_id = db.Column(db.String(128))  # Spotify Client ID
-    # Spotify Client Secret (should be stored encrypted)
+    client_id = db.Column(db.String(128))
     client_secret = db.Column(db.String(128))
-    access_token = db.Column(db.String(256))  # Access Token
-    refresh_token = db.Column(db.String(256))  # Refresh Token
-    expires_at = db.Column(db.DateTime)  # Token expiration time
+    access_token = db.Column(db.String(256))
+    refresh_token = db.Column(db.String(256))
+    expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
