@@ -51,7 +51,8 @@ def spotify_sso_login():
             client_secret=Config.SPOTIFY_CLIENT_SECRET,
             redirect_uri=redirect_sso_uri,
             scope=scope,
-            show_dialog=True
+            show_dialog=True,
+            cache_path=None  # Disable cache to avoid issues with SSO
         )
         auth_url = auth_manager.get_authorize_url()
         logger.debug(f"Generated Spotify SSO auth_url: {auth_url}")

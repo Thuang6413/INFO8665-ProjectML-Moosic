@@ -19,13 +19,15 @@ valence_value = closest_song['valence_tags']
 spotify_uri = f"spotify:track:{closest_song['spotify_id']}"
 
 print(f"Target Valence: {target_valence}")
-print(f"Closest match: '{track_name}' by {artist_name} (valence: {valence_value})")
+print(
+    f"Closest match: '{track_name}' by {artist_name} (valence: {valence_value})")
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=config.CLIENT_ID,
     client_secret=config.CLIENT_SECRET,
     redirect_uri=config.REDIRECT_URI,
-    scope=scope
+    scope=scope,
+    cache_path=None  # Disable cache to avoid issues with SSO
 ))
 
 devices = sp.devices()

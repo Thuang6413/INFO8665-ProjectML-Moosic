@@ -24,8 +24,7 @@ def authorize_spotify():
         redirect_uri=redirect_uri,
         scope=scope,
         show_dialog=True,
-        cache_path=os.path.join(os.path.dirname(
-            __file__), '..', '.spotify_cache')  # Custom cache location
+        cache_path=None  # Disable cache to avoid issues with SSO
     )
 
     # Get authorization URL

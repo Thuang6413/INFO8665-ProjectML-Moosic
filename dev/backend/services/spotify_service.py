@@ -83,7 +83,8 @@ def generate_spotify_auth_url(user_id):
             redirect_uri=redirect_uri,
             scope=scope,
             show_dialog=True,
-            state=state
+            state=state,
+            cache_path=None  # Disable cache to avoid issues with SSO
         )
         auth_url = auth_manager.get_authorize_url()
         logger.debug(f"Generated Spotify auth_url: {auth_url}")
@@ -117,7 +118,8 @@ def handle_spotify_callback(code, state=None):
             client_secret=credential.client_secret,
             redirect_uri=redirect_uri,
             scope=scope,
-            show_dialog=True
+            show_dialog=True,
+            cache_path=None  # Disable cache to avoid issues with SSO
         )
 
         token_info = auth_manager.get_access_token(code)
