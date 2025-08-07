@@ -1,12 +1,12 @@
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from config import Config
-from models import db, Song, UserSpotifyCredential
-from sqlalchemy.sql import select
-import os
-from datetime import datetime, timedelta
-from . import logger
 import math
+from . import logger
+from datetime import datetime, timedelta
+import os
+from sqlalchemy.sql import select
+from models import db, Song, UserSpotifyCredential
+from config import Config
+from spotipy.oauth2 import SpotifyOAuth
+import spotipy
 
 
 def get_spotify_client(user_id):
@@ -46,24 +46,29 @@ def get_spotify_client(user_id):
     return sp
 
 
-def recommend_song_by_valence(target_valence, target_arousal, user_id):
+def recommend_song_by_valence(target_valence, target_arousal, user_id, exclude_track_ids=None):
     """
     Recommend and play a song from SQLite based on the target valence and arousal values.
-    Returns the recommended song info or None if failed.
+    Excludes songs in exclude_track_ids. Returns the recommended song info or None if failed.
     """
+    if exclude_track_ids is None:
+        exclude_track_ids = set()
+
     try:
         with db.session() as session:
             songs = session.query(Song).filter(
                 Song.spotify_id.isnot(None),
                 Song.valence_tags.isnot(None),
-                # Ensure arousal_tags is not None
-                Song.arousal_tags.isnot(None)
+                Song.arousal_tags.isnot(None),
+                # Filter out already played songs
+                ~Song.spotify_id.in_(exclude_track_ids)
             ).all()
         logger.debug(
-            f"Found {len(songs)} songs in the database with valid Spotify IDs, valence, and arousal tags.")
+            f"Found {len(songs)} songs in the database with valid Spotify IDs, valence, and arousal tags after excluding {len(exclude_track_ids)} tracks.")
 
         if not songs:
-            logger.warning("No suitable songs found in database.")
+            logger.warning(
+                "No suitable songs found in database after excluding played tracks.")
             return None
 
         min_distance = float('inf')
@@ -79,7 +84,7 @@ def recommend_song_by_valence(target_valence, target_arousal, user_id):
                 closest_song = song
 
         if closest_song is None:
-            logger.warning("No suitable song found.")
+            logger.warning("No suitable song found after filtering.")
             return None
 
         track_name = closest_song.track

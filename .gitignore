@@ -329,3 +329,4 @@ sketch
 # moosic.db
 *.env
 *.spotify_cache
+mlruns

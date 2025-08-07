@@ -8,7 +8,8 @@ class Config:
     MODEL_PATHS = {
         # "emotion_face_affectnet": os.path.join(BASE_DIR, "ai_models", "Emotion_Recognition_Model.h5"),
         # "emotion_face_fer2013": os.path.join(BASE_DIR, "ai_models", "fer2013_emotion_recognition_model.h5"),
-        "mood_predictor": os.path.join(BASE_DIR, "ai_models", "mood_predictor.h5")
+        "mood_predictor": os.path.join(BASE_DIR, "ai_models", "mood_predictor.h5"),
+        # "ElenaRyumina/face_emotion_recognition": os.path.join(BASE_DIR, "ai_models", "weights_0_66_49_wo_gl.h5")
     }
 
     # Database Configuration
