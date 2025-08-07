@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // ✅ Link imported here
 
 const Sidebar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,9 +33,15 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="fixed left-0 top-0 h-screen w-56 bg-gray-950 border-r border-pink-900 text-white p-5 flex flex-col justify-between shadow-2xl z-50">
       <div>
-        {/* Logo */}
+
         <div className="flex justify-center mb-10">
-          <img src="/logo-white.png" alt="Moosic Logo" className="h-20 w-20" />
+          <Link to="/">
+            <img
+              src="/logo-white.png"
+              alt="Moosic Logo"
+              className="h-20 w-20 cursor-pointer"
+            />
+          </Link>
         </div>
 
         {/* Navigation */}
