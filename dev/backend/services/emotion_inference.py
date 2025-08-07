@@ -158,8 +158,8 @@ def predict_emotion(image_file, model_name=None, user_id=None):
 
             response = {
                 "emotion": emotion,
-                "valence": round(standardized_valence, 2),
-                "arousal": round(standardized_arousal, 2) if standardized_arousal is not None else None,
+                "valence": standardized_valence,
+                "arousal": standardized_arousal if standardized_arousal is not None else None,
                 "recommended_song_name": recommended_song_name,
                 "recommended_song_url": recommended_song_url,
                 "recommended_valence": recommended_valence,
