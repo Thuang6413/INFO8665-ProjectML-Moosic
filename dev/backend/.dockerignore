@@ -103,3 +103,4 @@ venv/
 logs/*
 *.log
 # ai_models/*
+venv_tf214/
