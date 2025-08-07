@@ -75,9 +75,11 @@ const Login: React.FC = () => {
       toast.success(message || 'Login successful!');
       setTimeout(() => navigate('/'), 2500);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Login failed.');
+      toast.error(
+        error?.response?.data?.message || error?.response?.data?.error || 'Login failed.');
       console.error(error);
     }
+
   };
 
   return (

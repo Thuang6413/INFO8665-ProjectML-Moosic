@@ -45,10 +45,10 @@ def login():
     data = request.get_json()
     try:
         if not data or not data.get("username") or not data.get("password"):
-            return jsonify({"error": "Missing required fields"}), 400
+            return jsonify({"message": "Username and password are required."}), 400
     except Exception as e:
         logger.error(f"Error processing login data: {e}")
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"message": str(e)}), 400
 
     response, status = login_user(data)
     return jsonify(response), status
