@@ -326,6 +326,6 @@ sketch
 # End of https://www.toptal.com/developers/gitignore/api/python,node,react
 
 # project specific
-moosic.db
+# moosic.db
 *.env
 *.spotify_cache

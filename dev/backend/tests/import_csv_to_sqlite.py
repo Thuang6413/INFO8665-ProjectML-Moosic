@@ -19,6 +19,8 @@ engine = create_engine(f'sqlite:///{db_path}')
 Base = declarative_base()
 
 # Define Song model independently, consistent with models/__init__.py
+
+
 class Song(Base):
     __tablename__ = 'songs'
     id = Column(Integer, primary_key=True)
@@ -34,25 +36,28 @@ class Song(Base):
     spotify_id = Column(String)
     genre = Column(String)
 
+
 def import_csv_data(csv_path):
     """
     Import data from a CSV file into the SQLite database.
     """
     # Create table
     Base.metadata.create_all(engine)
-    
+
     # Read CSV file
     df = pd.read_csv(csv_path)
-    
+
     # If the CSV contains an 'id' column, remove it to let SQLAlchemy auto-generate it
     if 'id' in df.columns:
         df = df.drop(columns=['id'])
-    
+
     # Import data into the 'songs' table, replacing existing data
     df.to_sql('songs', engine, if_exists='append', index=False)
     print(f"Successfully imported {len(df)} records into {db_path}")
 
+
 if __name__ == "__main__":
     # Modify the CSV file path as needed
-    csv_path = '/mnt/d/ConestogaCollegeWorkplaceLevel2/INFO8665-ProjectML/INFO8665-ProjectML-Moosic/data-collection/songs_dataset/muse_v3_spotify_names_100.csv'  # Replace with your CSV file path
+    # Replace with your CSV file path
+    csv_path = '/mnt/d/ConestogaCollegeWorkplaceLevel2/INFO8665-ProjectML/INFO8665-ProjectML-Moosic/data-collection/songs_dataset/muse_v3_clean_english.csv'
     import_csv_data(csv_path)
