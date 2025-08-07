@@ -59,5 +59,5 @@ def import_csv_data(csv_path):
 if __name__ == "__main__":
     # Modify the CSV file path as needed
     # Replace with your CSV file path
-    csv_path = '/mnt/d/ConestogaCollegeWorkplaceLevel2/INFO8665-ProjectML/INFO8665-ProjectML-Moosic/data-collection/songs_dataset/muse_v3_clean_english.csv'
+    csv_path = '/mnt/d/ConestogaCollegeWorkplaceLevel2/INFO8665-ProjectML/INFO8665-ProjectML-Moosic/data-collection/songs_dataset/muse_v3_clean_english_scaled.csv'
     import_csv_data(csv_path)

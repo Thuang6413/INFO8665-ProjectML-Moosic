@@ -119,8 +119,10 @@ def predict_emotion(image_file, model_name=None, user_id=None):
 
             # Normalization (the range here is 0-9, Spotify's valence is -1~1)
             # You may consider adjusting this normalization formula
-            standardized_valence = (valence + 1) / 2 * 9
-            standardized_arousal = (arousal + 1) / 2 * 9
+            standardized_valence = valence
+            standardized_arousal = arousal
+            # standardized_valence = (valence + 1) / 2 * 9
+            # standardized_arousal = (arousal + 1) / 2 * 9
 
             # --- The following song recommendation logic remains unchanged ---
 
