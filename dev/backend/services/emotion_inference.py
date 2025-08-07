@@ -6,6 +6,7 @@ from utils.spotify_utils import recommend_song_by_valence
 from . import logger, detector
 import os
 import tempfile
+import torch
 
 # Emotion class mapping (FER2013 standard)
 EMOTION_LABELS = ["angry", "disgust", "fear",
@@ -51,105 +52,77 @@ def predict_emotion(image_file, model_name=None, user_id=None):
         if not models or not isinstance(models, dict):
             raise RuntimeError("Models are not preloaded or corrupted")
 
-        if model_name is None or model_name not in models:
-            model_name = next(iter(models.keys()), None)
-            logger.debug(
-                f"[DEBUG] No model specified, using default: {model_name}")
-        if model_name not in models or models[model_name] is None:
-            raise ValueError(f"Model '{model_name}' not available")
-
-        model = models[model_name]
-        target_shape = model.input_shape
-        logger.debug(f"[DEBUG] Model input shape: {target_shape}")
+        # According to the logs, you always want to use the py-feat detector
+        # If you have different models that require different logic, you should use model_name here
+        # Here we assume py-feat is always used
+        logger.debug(f"[DEBUG] Using py-feat detector.")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
             image_file.save(temp_file.name)
             temp_file_path = temp_file.name
 
         try:
-            image_file.seek(0)
-            image_array = preprocess_image(image_file, target_shape)
-            logger.debug(
-                f"[DEBUG] Image preprocessed successfully with shape: {image_array.shape}")
+            # Removed redundant model.predict() and preprocess_image()
+            # Because py-feat handles image reading and preprocessing itself
 
-            predictions = model.predict(image_array)
             logger.debug(
-                f"[DEBUG] Raw predictions: {predictions}, type: {type(predictions)}, shape: {getattr(predictions, 'shape', 'No shape attribute')}")
+                f"[DEBUG] Temp file path: {temp_file_path}, exists: {os.path.exists(temp_file_path)}")
 
-            if True:
-                logger.debug(
-                    f"[DEBUG] Temp file path: {temp_file_path}, exists: {os.path.exists(temp_file_path)}")
+            # --- Main modification ---
+            # Use torch.no_grad() to disable gradient calculation
+            with torch.no_grad():
                 predictions = detector.detect_image(
-                    temp_file_path, output_size=(224, 224))
+                    temp_file_path, output_size=(224, 224), batch_size=1)
+            # --- End modification ---
 
-                emotions = predictions.emotions.iloc[0]
-                logger.debug(
-                    f"[DEBUG] Detected emotions: {emotions.to_dict()}")
-                emotion = emotions.idxmax()
-                logger.debug(f"[DEBUG] Predicted emotion: {emotion}")
+            # Debug the emotions data
+            logger.debug(
+                f"[DEBUG] Predictions type: {type(predictions)}, emotions: {predictions.emotions}")
 
-                valence = (
-                    emotions["happiness"] * 0.9 +
-                    emotions["sadness"] * -0.9 +
-                    emotions["anger"] * -0.8 +
-                    emotions["disgust"] * -0.6 +
-                    emotions["fear"] * -0.9 +
-                    emotions["surprise"] * 0.2 +
-                    emotions["neutral"] * 0.0
-                )
+            # Ensure predictions is not empty
+            if predictions.emotions.empty:
+                raise ValueError(
+                    "py-feat detector failed to detect any face or emotion.")
 
-                arousal = (
-                    emotions["happiness"] * 0.9 +
-                    emotions["sadness"] * -0.2 +
-                    emotions["anger"] * 0.8 +
-                    emotions["disgust"] * 0.3 +
-                    emotions["fear"] * 0.9 +
-                    emotions["surprise"] * 0.9 +
-                    emotions["neutral"] * 0.0
-                )
+            emotions = predictions.emotions.iloc[0]
+            # Your code already has this handling, which is good practice, but the error occurs before this
+            if isinstance(emotions, torch.Tensor):
+                emotions = emotions.detach().cpu().numpy()
 
-                standardized_valence = (valence + 1) / 2 * 9
-                standardized_arousal = (arousal + 1) / 2 * 9
+            logger.debug(
+                f"[DEBUG] Detected emotions (post-detach): {emotions.to_dict() if hasattr(emotions, 'to_dict') else emotions}")
 
-            elif model_name == "emotion_face_fer2013":
-                if isinstance(predictions, list):
-                    predictions = np.array(predictions, dtype=np.float32)
-                if len(predictions.shape) == 1:
-                    predictions = predictions.reshape(1, -1)
-                if len(predictions.shape) != 2 or predictions.shape[0] != 1:
-                    raise ValueError(
-                        f"Unexpected prediction shape: {predictions.shape}")
+            # Use idxmax() to find the emotion with the highest score
+            emotion = emotions.idxmax() if hasattr(emotions, 'idxmax') else "N/A"
+            logger.debug(f"[DEBUG] Predicted emotion: {emotion}")
 
-                emotion_index = np.argmax(predictions[0])
-                emotion = EMOTION_LABELS[emotion_index]
-                logger.debug(
-                    f"[DEBUG] Predicted emotion: {emotion}, Probabilities: {predictions[0]}")
-                valence_map = {
-                    "angry": -0.7, "disgust": -0.5, "fear": -0.3,
-                    "happy": 0.9, "sad": -0.4, "surprise": 0.6, "neutral": 0.0
-                }
-                predicted_valence = valence_map.get(emotion, 0.0)
-                standardized_valence = (predicted_valence + 1) / 2 * 10
-                standardized_arousal = None
+            # Valence and Arousal calculation (keep this part unchanged)
+            valence = (
+                emotions["happiness"] * 0.9 +
+                emotions["sadness"] * -0.9 +
+                emotions["anger"] * -0.8 +
+                emotions["disgust"] * -0.6 +
+                emotions["fear"] * -0.9 +
+                emotions["surprise"] * 0.2 +
+                emotions["neutral"] * 0.0
+            )
 
-                logger.debug(
-                    f"[DEBUG] Standardized valence: {standardized_valence}, arousal: {standardized_arousal}")
-            else:  # mood_predictor
-                if isinstance(predictions, (list, tuple)) and len(predictions) >= 2:
-                    predicted_valence = float(np.squeeze(predictions[0])[()])
-                    predicted_arousal = float(np.squeeze(predictions[1])[()])
-                    expression_output = np.squeeze(
-                        predictions[2]) if len(predictions) > 2 else None
-                    logger.debug(
-                        f"[DEBUG] Mood predictor outputs: Valence: {predicted_valence}, Arousal: {predicted_arousal}, Expression: {expression_output}")
-                    standardized_valence = (predicted_valence + 1) / 2 * 10
-                    standardized_arousal = (predicted_arousal + 1) / 2 * 10
-                    emotion = "N/A"
-                    logger.debug(
-                        f"[DEBUG] Standardized valence: {standardized_valence}, arousal: {standardized_arousal}")
-                else:
-                    raise ValueError(
-                        f"Unexpected predictions format for mood_predictor: {predictions}")
+            arousal = (
+                emotions["happiness"] * 0.9 +
+                emotions["sadness"] * -0.2 +
+                emotions["anger"] * 0.8 +
+                emotions["disgust"] * 0.3 +
+                emotions["fear"] * 0.9 +
+                emotions["surprise"] * 0.9 +
+                emotions["neutral"] * 0.0
+            )
+
+            # Normalization (the range here is 0-9, Spotify's valence is -1~1)
+            # You may consider adjusting this normalization formula
+            standardized_valence = (valence + 1) / 2 * 9
+            standardized_arousal = (arousal + 1) / 2 * 9
+
+            # --- The following song recommendation logic remains unchanged ---
 
             with current_app.app_context():
                 if user_id and user_id not in current_app.played_songs:
@@ -162,6 +135,7 @@ def predict_emotion(image_file, model_name=None, user_id=None):
                 recommended_song = recommend_song_by_valence(
                     standardized_valence, standardized_arousal, user_id, exclude_track_ids=exclude_track_ids)
                 recommended_song_name = recommended_song["track_name"] if recommended_song else "No song found"
+                # Note: This URL format may be incorrect, Spotify's URL format is https://open.spotify.com/track/TRACK_ID
                 recommended_song_url = f"https://open.spotify.com/track/{recommended_song['spotify_id']}" if recommended_song else ""
                 recommended_valence = recommended_song["valence"] if recommended_song else None
                 recommended_arousal = recommended_song["arousal"] if recommended_song else None
@@ -192,7 +166,7 @@ def predict_emotion(image_file, model_name=None, user_id=None):
             return jsonify(response)
 
         finally:
-            if 'temp_file_path' in locals():
+            if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
                 os.unlink(temp_file_path)
 
     except Exception as e:

@@ -36,6 +36,11 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
+# use cpu for tensorflow
+tf.config.set_visible_devices([], 'GPU')
+# TF_ENABLE_ONEDNN_OPTS=0
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 # Load environment variables from .env file
 load_dotenv()
 logger.info(
