@@ -39,7 +39,10 @@ const Register: React.FC = () => {
       toast.success(message || 'Registered successfully!', { autoClose: 2000 });
       setTimeout(() => navigate('/'), 2500); // delay to let toast show
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Registration failed.', { autoClose: 3000 });
+      toast.error(
+        error?.response?.data?.message || error?.response?.data?.error || 'Registration failed.', { autoClose: 3000 }
+      );
+
       console.error(error);
     }
   };
