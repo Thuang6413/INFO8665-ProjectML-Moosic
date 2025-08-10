@@ -3,7 +3,9 @@ import Cookies from 'js-cookie';
 import CameraComponent from '../components/CameraComponent';
 import Sidebar from '../components/Sidebar';
 import DarkVeil from '../components/DarkVeil';
-import '../index.css'; // Ensure glass-card styles are available
+import '../index.css'; // Glass-card styles
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -42,6 +44,7 @@ export default function HomePage() {
                   alt="Moosic Logo"
                 />
               </div>
+
               <h1 className="text-4xl font-bold mb-4 text-accent">
                 Welcome to <span className="logo-font text-accent">Moosic</span>
               </h1>
@@ -49,12 +52,14 @@ export default function HomePage() {
               <p className="text-gray-200 mb-6">
                 Log in to detect your mood and enjoy personalized music recommendations.
               </p>
-              <a
-                href="/login"
-                className="px-6 py-3 rounded-xl bg-accent text-white font-semibold hover:opacity-90 transition"
-              >
-                Sign In
-              </a>
+
+              {/* 🔹 Three versions of MUI Buttons */}
+              <Stack spacing={2} direction="row" justifyContent="center">
+                {/* Text Button */}
+                <Button href="/login" variant="text" sx={{ color: '#ff4081', fontWeight: 'bold' }}>
+                  Sign In
+                </Button>
+              </Stack>
             </div>
           )}
         </div>

@@ -29,3 +29,8 @@ body {
     padding: 2rem;
     /* optional padding */
 }
+
+.glow-text {
+    color: white;
+    text-shadow: 0 0 8px rgba(255, 0, 150, 0.6);
+}
