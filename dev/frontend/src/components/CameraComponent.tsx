@@ -8,6 +8,18 @@ const CameraComponent: React.FC = () => {
   const [cameraOn, setCameraOn] = useState(false);
   const [usingFrontCamera] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
+  const [emotionData, setEmotionData] = useState<{
+    emotion: string;
+    valence: number | null;
+    arousal: number | null;
+    song: string;
+  }>({
+    emotion: '',
+    valence: null,
+    arousal: null,
+    song: ''
+  });
+
   const navigate = useNavigate();
 
   const startCamera = async () => {
@@ -63,7 +75,17 @@ const CameraComponent: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
-        console.log('Server response:', await response.json());
+
+        const data = await response.json();
+        console.log('Server response:', data);
+
+        setEmotionData({
+          emotion: data.emotion || '',
+          valence: typeof data.valence === 'number' ? data.valence : null,
+          arousal: typeof data.arousal === 'number' ? data.arousal : null,
+          song: data.song?.title || data.song || ''
+        });
+
       } catch (err) {
         console.error('Error uploading image:', err);
       }
@@ -110,6 +132,30 @@ const CameraComponent: React.FC = () => {
           </svg>
         </button>
       </div>
+
+      {/* Output */}
+      {emotionData.emotion && (
+        <div className="mt-6 text-center">
+          <p className="text-lg">
+            <span className="font-bold text-accent">Emotion:</span> {emotionData.emotion}
+          </p>
+          {emotionData.valence !== null && (
+            <p>
+              <span className="font-bold text-accent">Valence:</span> {emotionData.valence.toFixed(2)}
+            </p>
+          )}
+          {emotionData.arousal !== null && (
+            <p>
+              <span className="font-bold text-accent">Arousal:</span> {emotionData.arousal.toFixed(2)}
+            </p>
+          )}
+          {emotionData.song && (
+            <p className="mt-2">
+              <span className="font-bold text-accent">Now Playing:</span> {emotionData.song}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Disclaimer */}
       <p className="text-xs text-center mt-5 text-textSecondary">
