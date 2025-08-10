@@ -190,3 +190,15 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 - [Spotify Web API](https://developer.spotify.com/documentation/web-api/) — for music streaming integration.
 - [TensorFlow](https://www.tensorflow.org/) — for ML experimentation during development.
 - [Py-Feat](https://py-feat.org/) — for facial expression detection and emotion analysis.
+
+## References
+
+- Athavle, M., Mudale, D., Shrivastav, U., & Gupta, M. (2021). CNN-based facial emotion recognition for automated music playlist generation. *Journal of Informatics Electrical and Electronics Engineering, 2*(2), 1–11.
+- Babua, T., Naira, R. R., & Geetha, A. (2023). Blockchain-integrated CNN model for emotion-based music recommendations. *Emotion-Aware Music Recommendation System*.
+- Kambham, S., Hubert, A., & Reddy, S. P. (2025). Real-time emotion detection and automated music recommendation using DeepFace. In D. C. Wyld et al. (Eds.), *Proceedings of the 2025 International Conference on Software Technology and Applications (SOFTPA)* (pp. 139–151). Computer Science & IT (CS & IT).
+- Leung, H. T., Law, M. H., & Horner, A. B. (2024). Enhancing emotional well-being through active music listening: A study on mood improvement effects of music rhythm games. *Proceedings of Meetings on Acoustics, 52*(1).
+- Rajesh, B., Keerthana, V., Darapaneni, N., & Reddy, P. A. (2025). ResNet50-based facial emotion recognition with explainable AI for music recommendation. *EAI Endorsed Transactions on Scalable Information Systems*.
+- Sheng, H., & Lau, M. (2024). Optimizing real-time facial expression recognition with ResNet architectures. *Journal of Machine Intelligence and Data Science, 5*(1).
+- Singh, S. (2023). Music recommendation system based on facial emotion expression using ConvLSTM and CNN.
+
+<b> *These can be found in /documentation.* </b>
