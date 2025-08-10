@@ -16,21 +16,32 @@ body {
     font-family: 'Alatsi', sans-serif;
 }
 
-/* 4) Glassmorphism card style */
+/* 4) Glassmorphism Card Style */
 .glass-card {
     background: rgba(0, 0, 0, 0.35);
-    /* Semi-transparent */
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
-
     border: none;
     border-radius: 1rem;
-    /* optional for rounded edges */
     padding: 2rem;
-    /* optional padding */
 }
 
+/* Optional glowing text effect */
 .glow-text {
     color: white;
     text-shadow: 0 0 8px rgba(255, 0, 150, 0.6);
+}
+
+/* Toastify Overrides */
+.Toastify__toast {
+    background: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    color: white !important;
+    font-family: 'LINE Seed Sans', sans-serif;
+    border-radius: 0.75rem !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem 1rem !important;
+
 }
