@@ -190,4 +190,3 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 - [Spotify Web API](https://developer.spotify.com/documentation/web-api/) — for music streaming integration.
 - [TensorFlow](https://www.tensorflow.org/) — for ML experimentation during development.
 - [Py-Feat](https://py-feat.org/) — for facial expression detection and emotion analysis.
-- [AffectNet Dataset](http://mohammadmahoor.com/affectnet/) — for emotion recognition model training reference.
