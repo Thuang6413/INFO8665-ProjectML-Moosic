@@ -171,9 +171,9 @@ Once the application is running:
 
 1. Open `http://localhost:5173` in your browser.
 2. Register or Login.
-3. Connect to Spotify via settings (optional, for playback).
+3. Connect to Spotify via API creds (required, for playback).
 4. Capture your mood via camera.
-5. Receive an instant, mood-based playlist.
+5. Receive an instant, mood-based recommendation.
 
 
 ---
