@@ -5,7 +5,6 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
 
-
 const Settings: React.FC = () => {
   const [form, setForm] = useState({
     username: '',
@@ -17,7 +16,7 @@ const Settings: React.FC = () => {
   const [submitDisabled, setSubmitDisabled] = useState(true);
 
   useEffect(() => {
-    document.title = 'Moosic Settings';
+    document.title = 'Moosic - Settings';
 
     const token = Cookies.get('token');
     if (!token) return;
@@ -134,19 +133,23 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-pink-900 text-white font-sans flex items-center justify-center px-4">
-      <div className="w-full max-w-2xl p-6 rounded-2xl shadow-2xl bg-gray-950/80 border border-pink-700">
+    <section className="min-h-screen bg-bgPrimary text-textPrimary font-sans flex items-center justify-center px-4">
+      <div className="w-full max-w-2xl p-6 rounded-2xl shadow-2xl bg-bgSecondary border border-accent">
+
         {/* Back to Music Button */}
         <div className="mb-6">
           <Link
-            to="/" // Change this to your desired route
-            className="inline-flex items-center text-pink-400 hover:text-pink-300 transition-colors font-medium text-sm"
+            to="/"
+            className="inline-flex items-center text-accent hover:opacity-80 transition-colors font-medium text-sm"
           >
-            <span className="text-xl mr-2">←</span> Back to Get Your Music
+            <span className="text-xl mr-2">←</span> Back to Music
           </Link>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8">Settings & Profile</h1>
+        {/* Page Title */}
+        <h1 className="text-3xl sm:text-4xl font-logo text-accent text-center mb-8">
+          Settings & Profile
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username */}
@@ -157,7 +160,7 @@ const Settings: React.FC = () => {
               name="username"
               value={form.username}
               readOnly
-              className="w-full px-4 py-3 bg-gray-800 border border-pink-700 rounded-xl text-gray-400"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-gray-400 cursor-not-allowed"
             />
           </div>
 
@@ -169,12 +172,11 @@ const Settings: React.FC = () => {
               name="client_id"
               value={form.client_id}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-gray-800 border rounded-xl placeholder-gray-400 ${
-                form.client_id && form.client_id.length !== 32
+              className={`w-full px-4 py-3 bg-gray-800 border rounded-xl placeholder-gray-500 text-textPrimary ${form.client_id && form.client_id.length !== 32
                   ? 'border-red-500'
-                  : 'border-pink-700'
-              }`}
-              placeholder="Client ID"
+                  : 'border-accent'
+                }`}
+              placeholder="Enter your Spotify Client ID"
             />
             {form.client_id && form.client_id.length !== 32 && (
               <p className="text-sm text-red-400 mt-1">Client ID must be 32 characters.</p>
@@ -189,28 +191,28 @@ const Settings: React.FC = () => {
               name="client_secret"
               value={form.client_secret}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-gray-800 border rounded-xl placeholder-gray-400 ${
-                form.client_secret && form.client_secret.length <= 10
+              className={`w-full px-4 py-3 bg-gray-800 border rounded-xl placeholder-gray-500 text-textPrimary ${form.client_secret && form.client_secret.length <= 10
                   ? 'border-red-500'
-                  : 'border-pink-700'
-              }`}
-              placeholder="Client Secret"
+                  : 'border-accent'
+                }`}
+              placeholder="Enter your Spotify Client Secret"
             />
             {form.client_secret && form.client_secret.length <= 10 && (
-              <p className="text-sm text-red-400 mt-1">Client Secret must be more than 10 characters.</p>
+              <p className="text-sm text-red-400 mt-1">
+                Client Secret must be more than 10 characters.
+              </p>
             )}
           </div>
 
-          {/* Buttons */}
+          {/* Action Buttons */}
           <div className="flex justify-between pt-4">
             <button
               type="submit"
               disabled={submitDisabled}
-              className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition-transform ${
-                submitDisabled
+              className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition-transform ${submitDisabled
                   ? 'bg-gray-700 cursor-not-allowed'
-                  : 'bg-pink-700 hover:bg-pink-600 hover:scale-105'
-              }`}
+                  : 'bg-accent hover:scale-105'
+                }`}
             >
               Save Changes
             </button>
@@ -219,19 +221,18 @@ const Settings: React.FC = () => {
               type="button"
               onClick={handleAuthorize}
               disabled={!authorizeEnabled}
-              className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition-transform ${
-                authorizeEnabled
-                  ? 'bg-green-600 hover:bg-green-500 hover:scale-105'
+              className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition-transform ${authorizeEnabled
+                  ? 'bg-green-600 hover:scale-105'
                   : 'bg-gray-700 cursor-not-allowed'
-              }`}
+                }`}
             >
               Authorize
             </button>
           </div>
         </form>
 
-        <p className="text-center text-xs text-gray-500 mt-6">
-          Powered by <span className="text-pink-400 font-semibold">Moosic</span>
+        <p className="text-center text-xs text-textSecondary mt-6">
+          Powered by <span className="text-accent font-semibold">Moosic</span>
         </p>
 
         <ToastContainer position="bottom-center" autoClose={3000} hideProgressBar />
