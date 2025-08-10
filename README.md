@@ -109,11 +109,10 @@ git clone https://github.com/Thuang6413/INFO8665-ProjectML-Moosic.git
 cd INFO8665-ProjectML-Moosic
 
 # Install backend dependencies
-cd dev/backend
 poetry install
 
 # Install frontend dependencies
-cd ../frontend
+cd dev/frontend
 npm install
 ```
 
@@ -153,9 +152,10 @@ npm install
 
 ```bash
 # Start backend
-cd dev/backend
-poetry shell       # If using Poetry
+cd INFO8665-ProjectML-Moosic
+poetry env activate | Invoke-Expression     # If using Poetry
 # OR source venv/bin/activate (if using requirements.txt)
+cd /dev/backend
 python app.py
 
 # Start frontend (in another terminal)
