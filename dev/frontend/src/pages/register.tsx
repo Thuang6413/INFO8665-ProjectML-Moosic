@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast, Flip } from "react-toastify";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import DarkVeil from "../components/DarkVeil";
+import "../index.css";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Moosic - Signup';
-    const token = Cookies.get('token');
-    if (token) {
-      navigate('/');
-    }
+    document.title = "Moosic - Sign up";
+    if (Cookies.get("token")) navigate("/");
   }, [navigate]);
 
   const [form, setForm] = useState({
-    username: '',
-    password: '',
+    username: "",
+    password: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,180 +31,120 @@ const Register: React.FC = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/api/v1/user/register',
+        "http://127.0.0.1:5000/api/v1/user/register",
         form,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
 
       const { token, message } = response.data;
-      Cookies.set('token', token, { expires: 7 });
+      Cookies.set("token", token, { expires: 7 });
 
-      toast.success(message || 'Registered successfully!', { autoClose: 2000 });
-      setTimeout(() => navigate('/'), 2500);
+      toast.success(message || "Registered successfully!");
+      setTimeout(() => navigate("/"), 1500);
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
         error?.response?.data?.error ||
-        'Registration failed.',
-        { autoClose: 3000 }
+        "Registration failed."
       );
-      console.error(error);
     }
   };
 
   return (
-    <section className="bg-bgPrimary text-textPrimary font-sans min-h-screen">
-      <ToastContainer />
-      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-        {/* Left Side */}
-        <div className="relative flex items-end px-4 pb-10 pt-60 sm:pb-16 md:justify-center lg:pb-24 sm:px-6 lg:px-8">
-          <div className="absolute inset-0">
+    <div className="relative min-h-screen font-sans overflow-hidden">
+      <DarkVeil
+        hueShift={325}
+        noiseIntensity={0.01}
+        scanlineIntensity={0.0}
+        warpAmount={0.0}
+        resolutionScale={1.2}
+      />
+
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2500}
+        hideProgressBar
+        closeOnClick
+        pauseOnHover
+        draggable={false}
+        transition={Flip}
+      />
+
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
+        <div className="glass-card max-w-md w-full p-8 rounded-2xl">
+          <div className="flex justify-center mb-6">
             <img
-              className="object-cover w-full h-full"
-              src="/signup.jpg"
-              alt="Signup Background"
+              className="w-auto h-20"
+              src="/logo-colored.png"
+              alt="Moosic Logo"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
-          <div className="relative w-full max-w-xl xl:pr-24 xl:mx-auto xl:max-w-xl">
-            <h3 className="text-4xl font-logo text-white leading-tight">
-              Music Matches Mood.
-              <br />
-              Moosic plays what you feel
-            </h3>
-            <ul className="grid grid-cols-1 mt-10 sm:grid-cols-2 gap-x-8 gap-y-4">
-              {[
-                'Mood-based playlists',
-                'Music for every feeling',
-                'Save & share your vibe',
-                '35k+ listeners & growing',
-              ].map((item, index) => (
-                <li key={index} className="flex items-center space-x-3">
-                  <div className="inline-flex items-center justify-center w-5 h-5 bg-accent rounded-full">
-                    <svg
-                      className="w-3.5 h-3.5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-lg font-medium text-white">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
 
-        {/* Right Side Form */}
-        <div className="flex items-center justify-center px-4 py-10 sm:px-6 lg:px-8 sm:py-16 lg:py-24 bg-bgSecondary">
-          <div className="xl:w-full xl:max-w-sm 2xl:max-w-md xl:mx-auto">
-            <h2 className="text-3xl font-logo text-accent sm:text-3xl">
-              Join Moosic
-              <br />
-              Where Feelings Sound
-            </h2>
-            <p className="mt-2 text-base text-textSecondary">
-              Already have an account?{' '}
-              <a
-                href="/login"
-                className="font-medium text-accent hover:underline"
+          <h1 className="text-3xl font-bold text-center mb-2 text-accent logo-font">
+            Join Moosic
+          </h1>
+          <p className="text-center text-gray-300 mb-6">
+            Where feelings sound — Sign up to get started.
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              placeholder="Username"
+              className="w-full py-3 px-4 bg-bgSecondary border border-gray-700 rounded-lg focus:border-accent focus:ring focus:ring-accent/20 text-white placeholder-gray-400"
+            />
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="w-full py-3 px-4 bg-bgSecondary border border-gray-700 rounded-lg focus:border-accent focus:ring focus:ring-accent/20 text-white placeholder-gray-400"
+            />
+
+            <Stack spacing={2} direction="row" justifyContent="center">
+              <Button
+                type="submit"
+                variant="text"
+                sx={{
+                  color: "#ff4081",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  "&:hover": { opacity: 0.7 },
+                }}
               >
-                Login
-              </a>
-            </p>
+                Sign Up
+              </Button>
+            </Stack>
+          </form>
 
-            <form className="mt-8" onSubmit={handleSubmit}>
-              <div className="space-y-5">
-                {/* Username */}
-                <div>
-                  <label className="text-base font-medium">Username</label>
-                  <div className="mt-2.5 relative text-gray-400 focus-within:text-gray-200">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <svg
-                        className="w-5 h-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
-                      name="username"
-                      value={form.username}
-                      onChange={handleChange}
-                      placeholder="Enter your username"
-                      className="block w-full py-4 pl-10 pr-4 bg-bgPrimary border border-gray-700 rounded-md placeholder-gray-500 text-textPrimary focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                </div>
+          <p className="mt-8 text-textSecondary text-center">
+            Already have an account?
+            <Button
+              href="/login"
+              variant="text"
+              sx={{
+                color: "#ff4081",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                "&:hover": { opacity: 0.7 },
+              }}
+            >
+              Sign In
+            </Button>
+          </p>
 
-                {/* Password */}
-                <div>
-                  <label className="text-base font-medium">Password</label>
-                  <div className="mt-2.5 relative text-gray-400 focus-within:text-gray-200">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <svg
-                        className="w-5 h-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      type="password"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      className="block w-full py-4 pl-10 pr-4 bg-bgPrimary border border-gray-700 rounded-md placeholder-gray-500 text-textPrimary focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                </div>
-
-                {/* Submit */}
-                <div>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white rounded-md bg-gradient-to-r from-fuchsia-600 to-blue-600 hover:opacity-80"
-                  >
-                    Sign up
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            <p className="mt-5 text-sm text-textSecondary">
-              By creating an account, you consent to the use of your image for real-time emotion detection to enhance your personalized music recommendations. Your image is processed securely and is not stored or retained.
-            </p>
-
-          </div>
+          <p className="mt-5 text-sm text-gray-400 text-center">
+            By creating an account, you consent to the use of your image for
+            real-time emotion detection to enhance your personalized music
+            recommendations. Your image is processed securely and is not stored.
+          </p>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
