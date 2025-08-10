@@ -104,7 +104,15 @@ export default function HomePage() {
               >
                 Sign In
               </Button>
+              <Button
+                href="/register"
+                variant="text"
+                sx={{ color: '#ff4081', fontWeight: 'bold' }}
+              >
+                Sign Up
+              </Button>
             </Stack>
+
           </div>
         )}
       </div>
