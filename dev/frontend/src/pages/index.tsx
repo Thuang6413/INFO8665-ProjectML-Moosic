@@ -11,9 +11,22 @@ export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = Cookies.get('token');
-    setIsLoggedIn(!!token);
+    const checkLogin = () => {
+      const token = Cookies.get('token');
+      setIsLoggedIn(!!token);
+    };
+
+    // Initial check
+    checkLogin();
+
+    // Listen for logout/login changes
+    window.addEventListener('storage', checkLogin);
+
+    return () => {
+      window.removeEventListener('storage', checkLogin);
+    };
   }, []);
+
 
   return (
     <div className="relative min-h-screen font-sans overflow-hidden">

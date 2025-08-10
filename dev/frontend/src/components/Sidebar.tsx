@@ -18,8 +18,13 @@ const Sidebar: React.FC = () => {
     Cookies.remove('user_name');
     Cookies.remove('user_id');
     setIsLoggedIn(false);
+
+    // Force re-check of auth-dependent UI right away
+    window.dispatchEvent(new Event("storage"));
+
     navigate('/');
   };
+
 
   const handleSettingsClick = () => {
     const token = Cookies.get('token');
@@ -62,7 +67,7 @@ const Sidebar: React.FC = () => {
             onClick={handleLogout}
             className="w-full px-4 py-2 bg-pink-700 rounded-lg hover:bg-pink-600 transition"
           >
-            Logout
+            Sign Out
           </button>
         ) : (
           <button
