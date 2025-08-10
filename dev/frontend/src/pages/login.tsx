@@ -1,65 +1,106 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const quotes = [
-  {
-    text: "Music expresses that which cannot be said and on which it is impossible to be silent.",
-    author: "Victor Hugo",
-    role: "Poet & Novelist",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Victor_Hugo_by_Étienne_Carjat_1876_-_full.jpg/330px-Victor_Hugo_by_Étienne_Carjat_1876_-_full.jpg"
-  },
-  {
-    text: "One good thing about music, when it hits you, you feel no pain.",
-    author: "Bob Marley",
-    role: "Musician",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Bob-Marley-in-Concert_Zurich_05-30-80.jpg/330px-Bob-Marley-in-Concert_Zurich_05-30-80.jpg"
-  },
-  {
-    text: "Without music, life would be a mistake.",
-    author: "Friedrich Nietzsche",
-    role: "Philosopher",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Nietzsche187a.jpg/330px-Nietzsche187a.jpg"
-  },
-  {
-    text: "Music is the strongest form of magic.",
-    author: "Marilyn Manson",
-    role: "Artist",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Marilyn_Manson_Booking_Photo.jpg/330px-Marilyn_Manson_Booking_Photo.jpg"
-  },
-  {
-    text: "Where words leave off, music begins.",
-    author: "Heinrich Heine",
-    role: "Poet",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Heinrich_Heine_1831.jpg/330px-Heinrich_Heine_1831.jpg"
-  },
-  {
-    text: "Music can change the world because it can change people.",
-    author: "Bono",
-    role: "U2 Vocalist",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Bono_2013.jpg/330px-Bono_2013.jpg"
-  }
+type Quote = {
+  text: string;
+  author: string;
+  role: string;
+};
+
+const quotes: Quote[] = [
+  { text: "Music expresses that which cannot be said and on which it is impossible to be silent.", author: "Victor Hugo", role: "Poet & Novelist" },
+  { text: "One good thing about music, when it hits you, you feel no pain.", author: "Bob Marley", role: "Musician" },
+  { text: "Without music, life would be a mistake.", author: "Friedrich Nietzsche", role: "Philosopher" },
+  { text: "Music is the strongest form of magic.", author: "Marilyn Manson", role: "Artist" },
+  { text: "Where words leave off, music begins.", author: "Heinrich Heine", role: "Poet" },
+  { text: "Music can change the world because it can change people.", author: "Bono", role: "U2 Vocalist" },
 ];
+
+// Fallback initials avatar (no API key needed)
+function uiAvatar(name: string) {
+  const n = encodeURIComponent(name);
+  return `https://ui-avatars.com/api/?name=${n}&background=random&size=128`;
+}
+
+// Get a Wikipedia thumbnail for a person (page summary API)
+async function wikipediaThumb(name: string, signal?: AbortSignal): Promise<string | null> {
+  const title = encodeURIComponent(name.replace(/\s+/g, '_'));
+  const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${title}`;
+  try {
+    const res = await fetch(url, { signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.thumbnail?.source || null;
+  } catch {
+    return null;
+  }
+}
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+  // form
   const [form, setForm] = useState({ username: '', password: '', email: '' });
+
+  // quote index — start from a random one, then rotate on every keystroke
+  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * quotes.length));
+  const currentQuote = useMemo(() => quotes[quoteIndex], [quoteIndex]);
+
+  // avatar url for current author
+  const [avatarUrl, setAvatarUrl] = useState<string>(uiAvatar(currentQuote.author));
+
+  // cache wikipedia thumbs so we don’t re-fetch per keystroke for the same author
+  const wikiCache = useRef<Map<string, string | null>>(new Map());
+  // keep track of ongoing fetch to avoid race conditions when typing fast
+  const fetchAbort = useRef<AbortController | null>(null);
 
   useEffect(() => {
     document.title = 'Moosic - Sign in';
     const token = Cookies.get('token');
-    if (token) {
-      navigate('/');
-    }
+    if (token) navigate('/');
   }, [navigate]);
 
+  // Whenever the quote/author changes (incl. each keystroke), load avatar:
+  useEffect(() => {
+    const author = currentQuote.author;
+
+    // default immediately to initials avatar (fast paint)
+    setAvatarUrl(uiAvatar(author));
+
+    // if we have cache, use it
+    if (wikiCache.current.has(author)) {
+      const cached = wikiCache.current.get(author);
+      if (cached) setAvatarUrl(cached);
+      return;
+    }
+
+    // fetch fresh thumbnail
+    fetchAbort.current?.abort();
+    const controller = new AbortController();
+    fetchAbort.current = controller;
+
+    (async () => {
+      const thumb = await wikipediaThumb(author, controller.signal);
+      wikiCache.current.set(author, thumb);
+      if (thumb) setAvatarUrl(thumb);
+    })();
+
+    return () => controller.abort();
+  }, [currentQuote]);
+
+  // SINGLE onChange handler: updates form and rotates quote exactly once per keystroke
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // update form state
     setForm((prev) => ({ ...prev, [name]: value }));
+
+    // rotate quote once per key event (mod length to cycle)
+    setQuoteIndex((prev) => (prev + 1) % quotes.length);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,16 +116,14 @@ const Login: React.FC = () => {
       toast.success(message || 'Login successful!');
       setTimeout(() => navigate('/'), 2500);
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || error?.response?.data?.error || 'Login failed.');
+      toast.error(error?.response?.data?.message || error?.response?.data?.error || 'Login failed.');
       console.error(error);
     }
-
   };
 
   return (
     <section>
-      <ToastContainer /> {/* Toast Container */}
+      <ToastContainer />
       <div className="min-h-full lg:flex lg:justify-between">
         {/* Left Side: Sign In */}
         <div className="flex flex-col justify-center flex-1 px-4 py-12 bg-white sm:px-6 lg:px-20 xl:px-24">
@@ -174,12 +213,19 @@ const Login: React.FC = () => {
               </svg>
             </div>
 
-            <blockquote className="text-2xl lg:text-3xl italic">“{randomQuote.text}”</blockquote>
+            <blockquote className="text-2xl lg:text-3xl italic">“{currentQuote.text}”</blockquote>
             <div className="flex items-center mt-8">
-              <img className="w-14 h-14 rounded-full object-cover" src={randomQuote.avatar} alt="Author" />
+              <img
+                className="w-14 h-14 rounded-full object-cover"
+                src={avatarUrl}
+                alt={currentQuote.author}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = uiAvatar(currentQuote.author);
+                }}
+              />
               <div className="ml-4">
-                <p className="text-xl font-bold">{randomQuote.author}</p>
-                <p className="text-sm text-gray-400">{randomQuote.role}</p>
+                <p className="text-xl font-bold">{currentQuote.author}</p>
+                <p className="text-sm text-gray-400">{currentQuote.role}</p>
               </div>
             </div>
           </div>
