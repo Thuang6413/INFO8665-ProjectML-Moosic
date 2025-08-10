@@ -152,12 +152,20 @@ const Settings: React.FC = () => {
         <div className="glass-card w-full max-w-2xl p-8 rounded-2xl">
           {/* Back to Music */}
           <div className="mb-6">
-            <Link
-              to="/"
-              className="inline-flex items-center text-accent hover:opacity-80 transition-colors font-medium text-sm"
+            <Button
+              href="/"
+              variant="text"
+
+              sx={{
+                color: "#ff4081",
+                fontWeight: "bold",
+                fontSize: "0.9rem",
+                textTransform: "none",
+                "&:hover": { opacity: 0.7 }
+              }}
             >
-              <span className="text-xl mr-2">←</span> Back to Music
-            </Link>
+              GO BACK
+            </Button>
           </div>
 
           {/* Title */}
