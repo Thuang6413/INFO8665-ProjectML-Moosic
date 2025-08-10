@@ -1,6 +1,6 @@
 services:
   backend:
-    image: thuang6413/moosic-backend:3.3
+    image: thuang6413/moosic-backend:3.4
     container_name: moosic-backend
     env_file:
       - docker-compose.env
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: thuang6413/moosic-frontend:3.2
+    image: thuang6413/moosic-frontend:3.4
     container_name: moosic-frontend
     ports:
       - "3000:3000"
