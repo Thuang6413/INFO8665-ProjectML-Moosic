@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 import CameraComponent from '../components/CameraComponent';
 import Sidebar from '../components/Sidebar';
 import DarkVeil from '../components/DarkVeil';
+import '../index.css'; // Ensure glass-card styles are available
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,7 +20,7 @@ export default function HomePage() {
         hueShift={325}
         noiseIntensity={0.01}
         scanlineIntensity={0.0}
-        warpAmount={0.}
+        warpAmount={0.0}
         resolutionScale={1.2}
       />
 
@@ -33,7 +34,7 @@ export default function HomePage() {
               <CameraComponent />
             </div>
           ) : (
-            <div className="text-center max-w-md mx-auto">
+            <div className="glass-card text-center max-w-md mx-auto">
               <div className="flex justify-center mb-6">
                 <img
                   className="w-auto h-32"
@@ -41,10 +42,11 @@ export default function HomePage() {
                   alt="Moosic Logo"
                 />
               </div>
-              <h1 className="text-4xl font-bold mb-4">
+              <h1 className="text-4xl font-bold mb-4 text-accent">
                 Welcome to <span className="logo-font text-accent">Moosic</span>
               </h1>
-              <p className="text-gray-300 mb-6">
+
+              <p className="text-gray-200 mb-6">
                 Log in to detect your mood and enjoy personalized music recommendations.
               </p>
               <a
