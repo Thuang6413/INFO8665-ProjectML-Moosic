@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import Button from "@mui/material/Button";
 
 const CameraComponent: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -8,17 +9,14 @@ const CameraComponent: React.FC = () => {
   const [cameraOn, setCameraOn] = useState(false);
   const [usingFrontCamera] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
+
   const [emotionData, setEmotionData] = useState<{
-    emotion: string;
-    valence: number | null;
-    arousal: number | null;
-    song: string;
-  }>({
-    emotion: '',
-    valence: null,
-    arousal: null,
-    song: ''
-  });
+    emotion?: string;
+    valence?: number | null;
+    arousal?: number | null;
+    recommended_song_name?: string;
+    recommended_song_url?: string;
+  } | null>(null);
 
   const navigate = useNavigate();
 
@@ -26,7 +24,6 @@ const CameraComponent: React.FC = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: usingFrontCamera ? 'user' : 'environment' }
@@ -78,14 +75,7 @@ const CameraComponent: React.FC = () => {
 
         const data = await response.json();
         console.log('Server response:', data);
-
-        setEmotionData({
-          emotion: data.emotion || '',
-          valence: typeof data.valence === 'number' ? data.valence : null,
-          arousal: typeof data.arousal === 'number' ? data.arousal : null,
-          song: data.song?.title || data.song || ''
-        });
-
+        setEmotionData(data);
       } catch (err) {
         console.error('Error uploading image:', err);
       }
@@ -134,56 +124,82 @@ const CameraComponent: React.FC = () => {
       </div>
 
       {/* Output */}
-      {emotionData.emotion && (
+      {emotionData && (
         <div className="mt-6 text-center">
-          <p className="text-lg">
-            <span className="font-bold text-accent">Emotion:</span> {emotionData.emotion}
-          </p>
-          {emotionData.valence !== null && (
+          {emotionData.emotion && (
+            <p className="text-lg">
+              <span className="font-bold text-accent">Emotion:</span> {emotionData.emotion}
+            </p>
+          )}
+          {typeof emotionData.valence === 'number' && (
             <p>
               <span className="font-bold text-accent">Valence:</span> {emotionData.valence.toFixed(2)}
             </p>
           )}
-          {emotionData.arousal !== null && (
+          {typeof emotionData.arousal === 'number' && (
             <p>
               <span className="font-bold text-accent">Arousal:</span> {emotionData.arousal.toFixed(2)}
             </p>
           )}
-          {emotionData.song && (
-            <p className="mt-2">
-              <span className="font-bold text-accent">Now Playing:</span> {emotionData.song}
-            </p>
+          {emotionData.recommended_song_name && (
+            <div className="mt-2">
+              <span className="font-bold text-accent">Now Playing:</span>{' '}
+              {emotionData.recommended_song_url ? (
+                <Button
+                  component="a"
+                  href={emotionData.recommended_song_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: "#ff4081",
+                    fontWeight: "bold",
+                    textDecoration: "underline",
+                    textTransform: "none",
+                    padding: 0,
+                    minWidth: 0,
+                    "&:hover": {
+                      opacity: 0.8,
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  {emotionData.recommended_song_name}
+                </Button>
+              ) : (
+                emotionData.recommended_song_name
+              )}
+            </div>
+          )}
+
+          {/* Disclaimer */}
+          <p className="text-xs text-center mt-5 text-textSecondary">
+            Your image will be used to personalize your music experience.<br />We respect your privacy.
+          </p>
+
+          {/* Login Popup */}
+          {showPopup && (
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+              <div className="bg-bgSecondary border border-accent/50 p-6 rounded-2xl text-center max-w-sm">
+                <p className="text-lg mb-4">Please log in to use the camera.</p>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="bg-accent hover:bg-accent/90 px-4 py-2 rounded-lg text-white"
+                >
+                  Go to Login
+                </button>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="ml-4 text-textSecondary hover:text-white text-sm underline"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
-
-      {/* Disclaimer */}
-      <p className="text-xs text-center mt-5 text-textSecondary">
-        Your image will be used to personalize your music experience.<br />We respect your privacy.
-      </p>
-
-      {/* Login Popup */}
-      {showPopup && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-bgSecondary border border-accent/50 p-6 rounded-2xl text-center max-w-sm">
-            <p className="text-lg mb-4">Please log in to use the camera.</p>
-            <button
-              onClick={() => navigate('/login')}
-              className="bg-accent hover:bg-accent/90 px-4 py-2 rounded-lg text-white"
-            >
-              Go to Login
-            </button>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="ml-4 text-textSecondary hover:text-white text-sm underline"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
-  );
-};
+  )
+}
 
 export default CameraComponent;
