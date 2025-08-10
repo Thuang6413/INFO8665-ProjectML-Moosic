@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import CameraComponent from '../components/CameraComponent';
-import Sidebar from '../components/Sidebar';
 import DarkVeil from '../components/DarkVeil';
-import '../index.css'; // Glass-card styles
+import '../index.css';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkLogin = () => {
@@ -16,17 +17,20 @@ export default function HomePage() {
       setIsLoggedIn(!!token);
     };
 
-    // Initial check
     checkLogin();
-
-    // Listen for logout/login changes
     window.addEventListener('storage', checkLogin);
-
-    return () => {
-      window.removeEventListener('storage', checkLogin);
-    };
+    return () => window.removeEventListener('storage', checkLogin);
   }, []);
 
+  const handleLogout = () => {
+    Cookies.remove('token');
+    Cookies.remove('user_email');
+    Cookies.remove('user_name');
+    Cookies.remove('user_id');
+    setIsLoggedIn(false);
+    window.dispatchEvent(new Event('storage'));
+    navigate('/');
+  };
 
   return (
     <div className="relative min-h-screen font-sans overflow-hidden">
@@ -39,43 +43,70 @@ export default function HomePage() {
         resolutionScale={1.2}
       />
 
-      {/* Foreground content */}
-      <div className="relative z-10 flex min-h-screen">
-        {isLoggedIn && <Sidebar />}
+      {/* 🔹 Foreground */}
+      <div className="relative z-10 flex flex-col min-h-screen items-center justify-center">
+        {isLoggedIn && (
+          <div className="absolute top-6 right-6 flex gap-3">
+            <Button
+              variant="text"
+              onClick={() => navigate('/settings')}
+              sx={{
+                color: '#ff4081',
+                fontWeight: 'bold',
+                textTransform: 'none',
+                '&:hover': { opacity: 0.7 }
+              }}
+            >
+              Settings
+            </Button>
+            <Button
+              variant="text"
+              onClick={handleLogout}
+              sx={{
+                color: '#ff4081',
+                fontWeight: 'bold',
+                textTransform: 'none',
+                '&:hover': { opacity: 0.7 }
+              }}
+            >
+              Sign Out
+            </Button>
+          </div>
+        )}
 
-        <div className="flex-1 flex items-center justify-center p-6">
-          {isLoggedIn ? (
-            <div className="w-full max-w-lg flex flex-col items-center">
-              <CameraComponent />
+        {isLoggedIn ? (
+          <div className="w-full max-w-lg flex justify-center">
+            <CameraComponent />
+          </div>
+        ) : (
+          <div className="glass-card text-center max-w-md mx-auto">
+            <div className="flex justify-center mb-6">
+              <img
+                className="w-auto h-32"
+                src="/logo-colored.png"
+                alt="Moosic Logo"
+              />
             </div>
-          ) : (
-            <div className="glass-card text-center max-w-md mx-auto">
-              <div className="flex justify-center mb-6">
-                <img
-                  className="w-auto h-32"
-                  src="/logo-colored.png"
-                  alt="Moosic Logo"
-                />
-              </div>
 
-              <h1 className="text-4xl font-bold mb-4 text-accent">
-                Welcome to <span className="logo-font text-accent">Moosic</span>
-              </h1>
+            <h1 className="text-4xl font-bold mb-4 text-accent">
+              Welcome to <span className="logo-font text-accent">Moosic</span>
+            </h1>
 
-              <p className="text-gray-200 mb-6">
-                Log in to detect your mood and enjoy personalized music recommendations.
-              </p>
+            <p className="text-gray-200 mb-6">
+              Log in to detect your mood and enjoy personalized music recommendations.
+            </p>
 
-              {/* 🔹 Three versions of MUI Buttons */}
-              <Stack spacing={2} direction="row" justifyContent="center">
-                {/* Text Button */}
-                <Button href="/login" variant="text" sx={{ color: '#ff4081', fontWeight: 'bold' }}>
-                  Sign In
-                </Button>
-              </Stack>
-            </div>
-          )}
-        </div>
+            <Stack spacing={2} direction="row" justifyContent="center">
+              <Button
+                href="/login"
+                variant="text"
+                sx={{ color: '#ff4081', fontWeight: 'bold' }}
+              >
+                Sign In
+              </Button>
+            </Stack>
+          </div>
+        )}
       </div>
     </div>
   );

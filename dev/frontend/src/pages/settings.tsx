@@ -3,7 +3,6 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { toast, ToastContainer, Flip } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import DarkVeil from "../components/DarkVeil";
@@ -170,7 +169,7 @@ const Settings: React.FC = () => {
 
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl font-logo text-accent text-center mb-8">
-            Settings & Profile
+            API Settings
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -262,10 +261,6 @@ const Settings: React.FC = () => {
               </Button>
             </Stack>
           </form>
-
-          <p className="text-center text-xs text-gray-400 mt-6">
-            Powered by <span className="text-accent font-semibold">Moosic</span>
-          </p>
         </div>
       </div>
     </div>
