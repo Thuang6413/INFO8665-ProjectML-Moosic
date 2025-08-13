@@ -45,7 +45,7 @@ docker run -d \
   -p 5000:5000 \
   --network moosic-network \
   --restart unless-stopped \
-  thuang6413/moosic-backend:3.2
+  thuang6413/moosic-backend:3.4
 ```
 
 #### 3. Run the Frontend Service
@@ -58,7 +58,7 @@ docker run -d \
   -p 3000:3000 \
   --network moosic-network \
   --restart unless-stopped \
-  thuang6413/moosic-frontend:3.2
+  thuang6413/moosic-frontend:3.4
 ```
 
 - The backend will be available at `http://localhost:5000`, and the frontend at `http://localhost:3000`.
@@ -93,7 +93,7 @@ docker-compose up --build
 ## Notes
 
 - If using the Docker CLI method, you must manually create or obtain the `docker-compose.env` file with the required environment variables (e.g., Spotify API credentials). Refer to the repository's documentation for the necessary variables.
-- The Docker CLI commands assume the images `thuang6413/moosic-backend:3.2` and `thuang6413/moosic-frontend:3.2` are available on Docker Hub. Ensure they are publicly accessible or use the correct image names if hosted elsewhere.
+- The Docker CLI commands assume the images `thuang6413/moosic-backend:3.4` and `thuang6413/moosic-frontend:3.4` are available on Docker Hub. Ensure they are publicly accessible or use the correct image names if hosted elsewhere.
 - To stop the containers when using Docker CLI:
 
   ```bash
