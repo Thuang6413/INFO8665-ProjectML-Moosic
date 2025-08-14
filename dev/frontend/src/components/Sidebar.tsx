@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import Button from '@mui/material/Button'; // ✅ MUI Button import
 
 const Sidebar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,6 +19,10 @@ const Sidebar: React.FC = () => {
     Cookies.remove('user_name');
     Cookies.remove('user_id');
     setIsLoggedIn(false);
+
+    // Force re-check of auth-dependent UI right away
+    window.dispatchEvent(new Event("storage"));
+
     navigate('/');
   };
 
@@ -33,38 +38,65 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="fixed left-0 top-0 h-screen w-56 bg-gray-950 border-r border-pink-900 text-white p-5 flex flex-col justify-between shadow-2xl z-50">
       <div>
-        {/* Logo */}
         <div className="flex justify-center mb-10">
-          <img src="/logo-white.png" alt="Moosic Logo" className="h-20 w-20" />
+          <Link to="/">
+            <img
+              src="/logo-white.png"
+              alt="Moosic Logo"
+              className="h-20 w-20 cursor-pointer"
+            />
+          </Link>
         </div>
 
         {/* Navigation */}
         <nav className="flex flex-col gap-4">
-          <button
+          <Button
+            variant="text"
             onClick={handleSettingsClick}
-            className="w-full text-left px-4 py-2 rounded-lg bg-gray-800 hover:bg-pink-700 transition duration-300"
+            sx={{
+              color: '#ff4081',
+              fontWeight: 'bold',
+              textTransform: 'none',
+              justifyContent: 'flex-start',
+              paddingLeft: '1rem',
+              '&:hover': { opacity: 0.7 }
+            }}
           >
             Settings
-          </button>
+          </Button>
         </nav>
       </div>
 
       {/* Auth Button */}
       <div className="mt-auto">
         {isLoggedIn ? (
-          <button
+          <Button
+            variant="text"
             onClick={handleLogout}
-            className="w-full px-4 py-2 bg-pink-700 rounded-lg hover:bg-pink-600 transition"
+            sx={{
+              color: '#ff4081',
+              fontWeight: 'bold',
+              textTransform: 'none',
+              width: '100%',
+              '&:hover': { opacity: 0.7 }
+            }}
           >
-            Logout
-          </button>
+            Sign Out
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="text"
             onClick={() => navigate('/login')}
-            className="w-full px-4 py-2 bg-pink-700 rounded-lg hover:bg-pink-600 transition"
+            sx={{
+              color: '#ff4081',
+              fontWeight: 'bold',
+              textTransform: 'none',
+              width: '100%',
+              '&:hover': { opacity: 0.7 }
+            }}
           >
             Login
-          </button>
+          </Button>
         )}
       </div>
 
@@ -73,18 +105,32 @@ const Sidebar: React.FC = () => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-gray-950 border border-pink-800 p-6 rounded-2xl shadow-xl text-center max-w-sm">
             <p className="text-white text-lg mb-4">Sorry, you have to login first.</p>
-            <button
+            <Button
+              variant="text"
               onClick={() => navigate('/login')}
-              className="bg-pink-700 hover:bg-pink-600 px-4 py-2 rounded-lg text-white"
+              sx={{
+                color: '#ff4081',
+                fontWeight: 'bold',
+                textTransform: 'none',
+                '&:hover': { opacity: 0.7 }
+              }}
             >
               Go to Login
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="text"
               onClick={() => setShowPopup(false)}
-              className="ml-4 text-gray-400 hover:text-white text-sm underline"
+              sx={{
+                color: 'gray',
+                fontSize: '0.875rem',
+                textDecoration: 'underline',
+                textTransform: 'none',
+                marginLeft: '1rem',
+                '&:hover': { color: 'white' }
+              }}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}

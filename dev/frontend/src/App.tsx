@@ -5,6 +5,9 @@ import LoginPage from './pages/login';
 import Register from './pages/register';
 import Settings from './pages/settings';
 import LogsPage from './pages/logsPage';
+import 'react-toastify/dist/ReactToastify.css';
+import './index.css';
+
 
 function App() {
   return (

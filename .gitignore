@@ -330,4 +330,4 @@ sketch
 *.env
 *.spotify_cache
 mlruns
-venv_tf214/
+dev/backend/moosic.db
