@@ -1,25 +1,26 @@
-version: '3.8'
-
 services:
+  backend:
+    image: thuang6413/moosic-backend:3.4
+    container_name: moosic-backend
+    env_file:
+      - docker-compose.env
+    ports:
+      - "5000:5000"
+    networks:
+      - moosic-network
+    restart: unless-stopped
+
   frontend:
-    image: node:24.1
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
+    image: thuang6413/moosic-frontend:3.4
+    container_name: moosic-frontend
     ports:
       - "3000:3000"
-    command: sh -c "npm install && npm start"
+    networks:
+      - moosic-network
+    restart: unless-stopped
     depends_on:
       - backend
 
-  backend:
-    image: python:3.12
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-    ports:
-      - "5000:5000"
-    command: sh -c "pip install -r requirements.txt && python app.py"
-    environment:
-      FLASK_APP: app.py
-      FLASK_ENV: development
+networks:
+  moosic-network:
+    driver: bridge

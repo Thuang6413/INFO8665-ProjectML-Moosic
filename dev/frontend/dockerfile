@@ -1,0 +1,27 @@
+# Use official Node.js image as the base
+FROM node:24.3.0-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and lock files
+COPY package.json ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy the rest of the application
+COPY . .
+
+# Install serve globally for production
+RUN npm install -g serve
+
+# Expose port
+EXPOSE 3000
+
+# Development mode
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+
+# Alternative production build (uncomment and use separate tag if needed)
+# RUN npm run build
+# CMD ["serve", "-s", "dist", "-l", "3000"]

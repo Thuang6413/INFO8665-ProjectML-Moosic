@@ -1,10 +1,47 @@
+/* 1) Import fonts first */
+@import url('https://fonts.googleapis.com/css2?family=Alatsi&family=LINE+Seed+Sans:wght@400;500;700&display=swap');
+
+/* 2) Tailwind base layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-#root {
-    max-width: 1280px;
-    margin: 0 !important  ;
-    padding: 0 !important;
-    text-align: center;
+/* 3) Global styles */
+html,
+body {
+    font-family: 'LINE Seed Sans', sans-serif;
+}
+
+.logo-font {
+    font-family: 'Alatsi', sans-serif;
+}
+
+/* 4) Glassmorphism Card Style */
+.glass-card {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: none;
+    border-radius: 1rem;
+    padding: 2rem;
+}
+
+/* Optional glowing text effect */
+.glow-text {
+    color: white;
+    text-shadow: 0 0 8px rgba(255, 0, 150, 0.6);
+}
+
+/* Toastify Overrides */
+.Toastify__toast {
+    background: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    color: white !important;
+    font-family: 'LINE Seed Sans', sans-serif;
+    border-radius: 0.75rem !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem 1rem !important;
+
 }

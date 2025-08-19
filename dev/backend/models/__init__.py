@@ -1,14 +1,22 @@
-# dev/backend/models/__init__.py
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
+
 
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(120), unique=True,
+                         nullable=True)  # Allow null for SSO users
+    # Allow null for SSO users
+    password_hash = db.Column(db.String(255), nullable=True)
+    # New field for Spotify SSO
+    spotify_user_id = db.Column(db.String(128), unique=True, nullable=True)
+
+    spotify_credential = db.relationship(
+        'UserSpotifyCredential', backref='user', uselist=False)
+
 
 class Token(db.Model):
     __tablename__ = 'tokens'
@@ -17,12 +25,14 @@ class Token(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    user = db.relationship('User', backref=db.backref('tokens', lazy='dynamic'))
+    user = db.relationship(
+        'User', backref=db.backref('tokens', lazy='dynamic'))
 
     def is_expired(self):
         from datetime import datetime
         return datetime.utcnow() > self.expires_at
-    
+
+
 class Song(db.Model):
     __tablename__ = 'songs'
     id = db.Column(db.Integer, primary_key=True)
@@ -37,3 +47,17 @@ class Song(db.Model):
     mbid = db.Column(db.String)
     spotify_id = db.Column(db.String)
     genre = db.Column(db.String)
+
+
+class UserSpotifyCredential(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        'users.id'), unique=True, nullable=False)
+    client_id = db.Column(db.String(128))
+    client_secret = db.Column(db.String(128))
+    access_token = db.Column(db.String(256))
+    refresh_token = db.Column(db.String(256))
+    expires_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

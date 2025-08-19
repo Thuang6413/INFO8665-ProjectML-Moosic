@@ -5,39 +5,71 @@ from routes.user_routes import user_bp
 from routes.emotion_routes import emotion_bp
 from routes.music_routes import music_bp
 from routes.model_routes import model_bp
+from routes.log_routes import log_bp
+# Add import for spotify_callback
+from routes.spotify_routes import spotify_bp, spotify_callback, spotify_sso_callback
+from routes import log_request
 from utils.error_handlers import register_error_handlers
 from models import db
 from config import Config
 from dotenv import load_dotenv
-from flask_cors import CORS 
+from flask_cors import CORS
 import os
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+# Ensure logs directory exists
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
+# Configure logging
+logger = logging.getLogger("moosic_logger")
+logger.setLevel(logging.DEBUG)
+
+file_handler = TimedRotatingFileHandler(
+    "logs/moosic.log", when="midnight", interval=1, backupCount=7)
+file_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
+# use cpu for tensorflow
+tf.config.set_visible_devices([], 'GPU')
+# TF_ENABLE_ONEDNN_OPTS=0
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Load environment variables from .env file
 load_dotenv()
-print(f"[DEBUG] Loaded env: {os.getenv('SPOTIFY_CLIENT_ID')}")
+logger.info(
+    f"Loaded environment variable: SPOTIFY_CLIENT_ID={os.getenv('SPOTIFY_CLIENT_ID')}"
+)
 
-# Check GPU availability at startup
-print("[DEBUG] Checking GPU availability...")
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-    print(f"[DEBUG] GPU detected: {len(gpus)} GPU(s) available - {gpus}")
-else:
-    print("[DEBUG] No GPU detected. Running on CPU.")
-
+# Initialize Flask app (moved earlier to avoid 'app not defined')
 app = Flask(__name__)
 CORS(app)
 
+# Check GPU availability at startup
+logger.info("Checking GPU availability...")
+gpus = tf.config.list_physical_devices("GPU")
+if gpus:
+    logger.info(f"GPU detected: {len(gpus)} GPU(s) available - {gpus}")
+else:
+    logger.info("No GPU detected. Running on CPU.")
+
 # Load all models at startup and attach to app
-print("[DEBUG] Initializing application and loading emotion recognition models...")
+logger.info("Initializing application and loading emotion recognition models...")
 app.models = {}
 try:
     for model_name, model_path in Config.MODEL_PATHS.items():
-        print(f"[DEBUG] Loading model '{model_name}' from: {model_path}")
+        logger.info(f"Loading model '{model_name}' from: {model_path}")
         app.models[model_name] = tf.keras.models.load_model(model_path)
-        print(f"[DEBUG] Model '{model_name}' loaded successfully")
+        logger.info(f"Model '{model_name}' loaded successfully")
 except Exception as e:
-    print(f"[ERROR] Failed to load one or more models: {e}")
-    app.models = {}  # Set to empty dict if loading fails
+    logger.error(f"Failed to load one or more models: {e}")
+    app.models = {}
 
 # Configure the database from config.py
 app.config.from_object(Config)
@@ -45,11 +77,23 @@ app.config.from_object(Config)
 # Initialize the database
 db.init_app(app)
 
+# Register global before_request
+app.before_request(log_request)
 # Register Blueprint routes
 app.register_blueprint(user_bp, url_prefix="/api/v1/user")
 app.register_blueprint(emotion_bp, url_prefix="/api/v1/emotion")
 app.register_blueprint(music_bp, url_prefix="/api/v1/music")
 app.register_blueprint(model_bp, url_prefix="/api/v1/model")
+app.register_blueprint(spotify_bp, url_prefix="/api/v1/spotify")
+# Register Spotify callback route
+app.add_url_rule('/spotify/callback',
+                 # Use the function directly
+                 view_func=spotify_callback, methods=['GET'])
+app.add_url_rule('/sso/callback',
+                 # Use the function directly
+                 view_func=spotify_sso_callback, methods=['GET'])
+app.register_blueprint(log_bp, url_prefix="/api/v1/log")
+
 
 # Register error handlers
 register_error_handlers(app)
@@ -59,4 +103,5 @@ with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
+    logger.info("Moosic backend server is starting...")
     app.run(host="0.0.0.0", port=5000, debug=True)
