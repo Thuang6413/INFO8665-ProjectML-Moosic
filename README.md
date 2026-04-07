@@ -1,3 +1,7 @@
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![React](https://img.shields.io/badge/React-Vite-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 # Moosic
 
 AI-powered music recommendation platform that detects your mood from facial expressions and instantly plays songs that match your emotions – uses Spotify playback.
@@ -21,7 +25,7 @@ AI-powered music recommendation platform that detects your mood from facial expr
 
 ## About
 
-**Moosic** is an AI-driven music streaming app designed to enhance emotional well-being through personalized music recommendations.  
+**Moosic** is an AI-powered music recommendation system that detects user emotions from facial expressions and maps them to valence–arousal space to deliver personalized music via Spotify.  
 It uses a **pretrained Py-Feat model** to detect facial expressions from an image and maps these to **valence** and **arousal** scores using a weighted average of five primary emotions.  
 These emotion metrics are then matched to songs in a curated dataset containing valence and arousal values, with playback through Spotify.
 
@@ -43,12 +47,12 @@ While the TensorFlow model showed promising results, the Py-Feat model was ultim
 
 ## Tech Stack
 
-- **Frontend:** React (Vite + TypeScript), TailwindCSS
-- **Backend:** Python (Flask)
-- **Machine Learning:** Py-Feat, TensorFlow, OpenCV
-- **Database:** SQLite
-- **Integration:** Spotify Web API
-- **Other Tools:** Poetry, Docker, GitHub Actions
+- **Frontend:** React (Vite), TypeScript, TailwindCSS  
+- **Backend:** Flask (Python)  
+- **ML:** Py-Feat, TensorFlow, OpenCV  
+- **Database:** SQLite  
+- **APIs:** Spotify Web API  
+- **DevOps:** Docker, GitHub Actions 
 
 ---
 
@@ -145,24 +149,39 @@ pip install -r requirements.txt
 cd ../frontend
 npm install
 ```
-
 ---
 
 ## Running Locally
 
+#### Using Poetry (Recommended)
+
 ```bash
 # Start backend
-cd INFO8665-ProjectML-Moosic
-poetry env activate | Invoke-Expression     # If using Poetry
-# OR source venv/bin/activate (if using requirements.txt)
-cd /dev/backend
-python app.py
+poetry run python dev/backend/app.py
 
 # Start frontend (in another terminal)
 cd dev/frontend
 npm run dev
 ```
 
+#### Using venv
+
+```bash
+# Start backend
+cd dev/backend
+
+# Activate virtual environment
+# macOS / Linux:
+source venv/bin/activate
+# Windows (PowerShell):
+venv\Scripts\Activate.ps1
+
+python app.py
+
+# Start frontend (in another terminal)
+cd ../frontend
+npm run dev
+```
 ---
 
 ## Usage
@@ -201,4 +220,4 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 - Sheng, H., & Lau, M. (2024). Optimizing real-time facial expression recognition with ResNet architectures. *Journal of Machine Intelligence and Data Science, 5*(1).
 - Singh, S. (2023). Music recommendation system based on facial emotion expression using ConvLSTM and CNN.
 
-<b> *These can be found in /documentation.* </b>
+<b> *These references are available in the `/documentation` folder.* </b>
