@@ -96,6 +96,7 @@ INFO8665-ProjectML-Moosic/
 - **Node.js** `>=18`
 - **Poetry** (if using Poetry setup)
 - **Git**
+- **Spotify Premium account** (required for playback)
 
 ---
 
@@ -193,6 +194,8 @@ Once the application is running:
 3. Connect to Spotify via API creds (required, for playback).
 4. Capture your mood via camera.
 5. Receive an instant, mood-based recommendation.
+
+⚠️ **Note:** A Spotify Premium account is required for playback functionality via the Spotify Web API.
 
 
 ---
